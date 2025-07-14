@@ -1,0 +1,28 @@
+
+[
+    {
+      "id": "SUP-001",
+      "name": "Turkish Textile Co.",
+      "email": "orders@turkishtextile.com",
+      "phone": "+90-212-123-4567",
+      "address": "Istanbul, Turkey",
+      "products": ["Velvet", "Silk"],
+      "rating": 4.5,
+      "lastOrderDate": "2024-12-25",
+      "totalOrders": 15,
+      "totalSpent": 85000
+    },
+    {
+      "id": "SUP-002",
+      "name": "Italian Fabrics Ltd.",
+      "email": "sales@italianfabrics.it",
+      "phone": "+39-02-987-6543",
+      "address": "Milan, Italy",
+      "products": ["Nubuk", "Leather"],
+      "rating": 4.8,
+      "lastOrderDate": "2024-12-20",
+      "totalOrders": 8,
+      "totalSpent": 42000
+    }
+]
+

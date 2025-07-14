@@ -1,0 +1,52 @@
+
+[
+    {
+      "id": "CUST-001",
+      "name": "Libya Textile Co.",
+      "email": "orders@libyan-textile.ly",
+      "phone": "+218-21-345-6789",
+      "address": "بنغازي، ليبيا",
+      "totalOrders": 3,
+      "totalRevenue": 45000,
+      "lastOrderDate": "2025-01-15",
+      "paymentTerms": "30 days",
+      "creditLimit": 50000
+    },
+    {
+      "id": "CUST-002",
+      "name": "شركة ABC",
+      "email": "info@abc-company.com",
+      "phone": "+218-91-234-5678",
+      "address": "طرابلس، ليبيا",
+      "totalOrders": 1,
+      "totalRevenue": 1900,
+      "lastOrderDate": "2025-01-09",
+      "paymentTerms": "30 days",
+      "creditLimit": 10000
+    },
+    {
+      "id": "CUST-003",
+      "name": "Ahmed Textiles Ltd.",
+      "email": "info@ahmed-textiles.com",
+      "phone": "+218-51-987-6543",
+      "address": "مصراتة، ليبيا",
+      "totalOrders": 2,
+      "totalRevenue": 28000,
+      "lastOrderDate": "2025-01-14",
+      "paymentTerms": "15 days",
+      "creditLimit": 35000
+    },
+    {
+      "id": "CUST-004",
+      "name": "Cairo Fashion House",
+      "email": "finance@cairo-fashion.eg",
+      "phone": "+20-2-123-4567",
+      "address": "القاهرة، مصر",
+      "totalOrders": 2,
+      "totalRevenue": 15000,
+      "lastOrderDate": "2025-01-13",
+      "paymentTerms": "30 days",
+      "creditLimit": 20000
+    }
+]
+

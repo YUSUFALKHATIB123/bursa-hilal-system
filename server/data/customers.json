@@ -1,0 +1,82 @@
+[
+  {
+    "id": "CUST-001",
+    "name": "Libya Textile Co.",
+    "email": "orders@libyan-textile.ly",
+    "phone": "+218-21-345-6789",
+    "address": "بنغازي، ليبيا",
+    "totalOrders": 1,
+    "totalRevenue": 1500,
+    "lastOrderDate": "2025-07-12",
+    "paymentTerms": "30 days",
+    "creditLimit": 50000,
+    "whatsapp": "",
+    "customerType": "wholesale",
+    "company": "Libya Textile Co.",
+    "notes": ""
+  },
+  {
+    "id": "CUST-002",
+    "name": "شركة ABC",
+    "email": "info@abc-company.com",
+    "phone": "+218-91-234-5678",
+    "address": "طرابلس، ليبيا",
+    "totalOrders": 0,
+    "totalRevenue": 0,
+    "lastOrderDate": "2025-01-09",
+    "paymentTerms": "30 days",
+    "creditLimit": 10000
+  },
+  {
+    "id": "CUST-003",
+    "name": "Ahmed Textiles Ltd.",
+    "email": "info@ahmed-textiles.com",
+    "phone": "+218-51-987-6543",
+    "address": "مصراتة، ليبيا",
+    "totalOrders": 0,
+    "totalRevenue": 0,
+    "lastOrderDate": "2025-01-14",
+    "paymentTerms": "15 days",
+    "creditLimit": 35000
+  },
+  {
+    "id": "CUST-004",
+    "name": "Cairo Fashion House",
+    "email": "finance@cairo-fashion.eg",
+    "phone": "+20-2-123-4567",
+    "address": "القاهرة، مصر",
+    "totalOrders": 0,
+    "totalRevenue": 0,
+    "lastOrderDate": "2025-01-13",
+    "paymentTerms": "30 days",
+    "creditLimit": 20000
+  },
+  {
+    "id": "CUS-1752354964329",
+    "name": "Test Customer",
+    "email": "test@test.com",
+    "phone": "+218-123-456-789",
+    "address": "Test Location",
+    "customerType": "premium",
+    "totalOrders": 0,
+    "totalRevenue": 0,
+    "whatsapp": "",
+    "notes": ""
+  },
+  {
+    "id": "CUS-1752392383844",
+    "email": "test@example.com",
+    "name": "Test Customer",
+    "phone": "+218-91-123-4567",
+    "address": "Test Address"
+  },
+  {
+    "id": "CUS-1752392699610",
+    "name": "YUSUF ALKHATIB",
+    "phone": "+905343168831",
+    "whatsapp": "asdasd",
+    "email": "yousef.alkhatib.ya@gmail.com",
+    "address": "asdasd",
+    "notes": "شسيشسي"
+  }
+]

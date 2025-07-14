@@ -1,0 +1,13 @@
+
+{
+    "revenue": 67200,
+    "expenses": 44800,
+    "profit": 22400,
+    "margin": 33.3,
+    "monthlyRevenue": [45000, 52000, 48000, 61000, 55000, 67200],
+    "monthlyExpenses": [32000, 35000, 38000, 41000, 39000, 44800],
+    "yearToDateRevenue": 328200,
+    "yearToDateExpenses": 248800,
+    "yearToDateProfit": 79400
+}
+

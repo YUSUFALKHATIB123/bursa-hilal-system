@@ -1,0 +1,55 @@
+
+[
+    {
+      "id": "EMP-001",
+      "name": "غيث الخطيب",
+      "position": "مشغل آلة",
+      "salary": 9000,
+      "paid": 5000,
+      "remaining": 4000,
+      "hoursWorked": 160,
+      "shift": "الصباحية",
+      "absences": 2,
+      "overtime": 12,
+      "status": "active",
+      "lastWorkDate": "2025-01-15",
+      "hireDate": "2023-06-01",
+      "department": "Production",
+      "emergencyContact": "+218-91-111-2222"
+    },
+    {
+      "id": "EMP-002",
+      "name": "محمد حج محمد",
+      "position": "مراقب جودة",
+      "salary": 8500,
+      "paid": 8500,
+      "remaining": 0,
+      "hoursWorked": 168,
+      "shift": "المسائية",
+      "absences": 0,
+      "overtime": 8,
+      "status": "active",
+      "lastWorkDate": "2025-01-15",
+      "hireDate": "2023-03-15",
+      "department": "Quality Control",
+      "emergencyContact": "+218-92-333-4444"
+    },
+    {
+      "id": "EMP-003",
+      "name": "عبدالله الخطيب",
+      "position": "فني صيانة",
+      "salary": 7500,
+      "paid": 3000,
+      "remaining": 4500,
+      "hoursWorked": 152,
+      "shift": "الصباحية",
+      "absences": 3,
+      "overtime": 4,
+      "status": "on_leave",
+      "lastWorkDate": "2025-01-12",
+      "hireDate": "2023-09-01",
+      "department": "Maintenance",
+      "emergencyContact": "+218-93-555-6666"
+    }
+]
+

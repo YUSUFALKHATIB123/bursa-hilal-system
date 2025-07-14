@@ -1,0 +1,100 @@
+
+[
+    {
+      "id": "NOTIF-001",
+      "title": { "en": "Invoice Overdue", "ar": "فاتورة متأخرة" },
+      "message": {
+        "en": "Invoice INV-003 from Cairo Fashion House is overdue by 1 day",
+        "ar": "الفاتورة INV-003 من Cairo Fashion House متأخرة بيوم واحد"
+      },
+      "type": "invoice_due",
+      "category": "financial",
+      "priority": "high",
+      "timestamp": "2025-01-15T09:00:00Z",
+      "read": false,
+      "actionUrl": "/invoices",
+      "relatedEntityId": "INV-003",
+      "icon": "AlertTriangle"
+    },
+    {
+      "id": "NOTIF-002",
+      "title": { "en": "Low Stock Alert", "ar": "تنبيه انخفاض المخزون" },
+      "message": {
+        "en": "Babyface Blue fabric is below minimum threshold (800 meters remaining)",
+        "ar": "قماش البيبي فيس الأزرق أقل من الحد الأدنى (800 متر متبقي)"
+      },
+      "type": "low_stock",
+      "category": "inventory",
+      "priority": "high",
+      "timestamp": "2025-01-15T08:30:00Z",
+      "read": false,
+      "actionUrl": "/inventory",
+      "relatedEntityId": "INV-004",
+      "icon": "Package"
+    },
+    {
+      "id": "NOTIF-003",
+      "title": { "en": "Order Processing Update", "ar": "تحديث معالجة الطلب" },
+      "message": {
+        "en": "Order ORD-001 has moved to dyeing stage",
+        "ar": "الطلب ORD-001 انتقل إلى مرحلة الصباغة"
+      },
+      "type": "order_update",
+      "category": "production",
+      "priority": "medium",
+      "timestamp": "2025-01-15T07:45:00Z",
+      "read": false,
+      "actionUrl": "/track-order/ORD-001/details",
+      "relatedEntityId": "ORD-001",
+      "icon": "Clock"
+    },
+    {
+      "id": "NOTIF-004",
+      "title": { "en": "Employee Absence", "ar": "غياب موظف" },
+      "message": {
+        "en": "عبدالله الخطيب is on leave today",
+        "ar": "عبدالله الخطيب في إجازة اليوم"
+      },
+      "type": "employee_absent",
+      "category": "hr",
+      "priority": "low",
+      "timestamp": "2025-01-15T06:00:00Z",
+      "read": true,
+      "actionUrl": "/employees",
+      "relatedEntityId": "EMP-003",
+      "icon": "UserCheck"
+    },
+    {
+      "id": "NOTIF-005",
+      "title": { "en": "Payment Received", "ar": "تم استلام دفعة" },
+      "message": {
+        "en": "Partial payment of $1,000 received for invoice INV-TEST-001",
+        "ar": "تم استلام دفعة جزئية 1,000$ للفاتورة INV-TEST-001"
+      },
+      "type": "payment_received",
+      "category": "financial",
+      "priority": "medium",
+      "timestamp": "2025-01-09T14:30:00Z",
+      "read": true,
+      "actionUrl": "/invoices",
+      "relatedEntityId": "INV-TEST-001",
+      "icon": "DollarSign"
+    },
+    {
+      "id": "NOTIF-006",
+      "title": { "en": "New Customer Added", "ar": "تم إضافة عميل جديد" },
+      "message": {
+        "en": "شركة ABC has been added as a new customer",
+        "ar": "تمت إضافة شركة ABC كعميل جديد"
+      },
+      "type": "customer_added",
+      "category": "sales",
+      "priority": "low",
+      "timestamp": "2025-01-09T10:00:00Z",
+      "read": true,
+      "actionUrl": "/customers",
+      "relatedEntityId": "CUST-002",
+      "icon": "Users"
+    }
+]
+

@@ -1,0 +1,739 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 158 78% 13%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 158 58% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    text-align: right;
+  }
+
+  /* Fix RTL content centering */
+  [dir="rtl"] .max-w-7xl {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  [dir="rtl"] .mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  /* Fix sidebar positioning in RTL */
+  [dir="rtl"] .sidebar-rtl {
+    right: 0;
+    left: auto;
+  }
+
+  /* Arabic font and RTL improvements */
+  .font-arabic {
+    font-family: "Cairo", "Arial", sans-serif;
+  }
+
+  /* Better Arabic text rendering */
+  [dir="rtl"] .font-arabic {
+    letter-spacing: normal;
+    word-spacing: normal;
+  }
+
+  /* Prevent layout shifts with specific spacing fixes */
+  .rtl-safe-spacing > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 0.5rem;
+  }
+
+  [dir="rtl"] .rtl-safe-spacing > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+
+  /* Mobile Touch Optimizations */
+  @media (max-width: 768px) {
+    * {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    button,
+    a,
+    [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+      cursor: pointer;
+    }
+
+    /* Prevent zoom on input focus */
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+
+  /* Action Buttons Alignment Fix */
+  .actions-column {
+    text-align: center !important;
+  }
+
+  .actions-column th {
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  .actions-column td {
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  /* Fix for action buttons in tables */
+  .action-buttons {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .action-buttons button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    padding: 0.25rem !important;
+  }
+
+  /* RTL Action buttons */
+  [dir="rtl"] .action-buttons {
+    flex-direction: row-reverse !important;
+  }
+
+  /* Prevent button text from being slanted */
+  button,
+  .btn {
+    font-style: normal !important;
+    text-transform: none !important;
+    font-variant: normal !important;
+    transform: none !important;
+    skew: none !important;
+  }
+
+  /* Enhanced RTL layout fixes */
+  [dir="rtl"] .flex {
+    flex-direction: row-reverse;
+  }
+
+  [dir="rtl"] .flex-row {
+    flex-direction: row-reverse !important;
+  }
+
+  [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+
+  [dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 0;
+    margin-right: 0.75rem;
+  }
+
+  [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 0;
+    margin-right: 1rem;
+  }
+
+  /* Safe RTL containers that don't shift layout */
+  .rtl-content {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .ltr-layout {
+    direction: ltr;
+  }
+
+  /* Responsive design improvements */
+  .responsive-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .responsive-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .responsive-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .responsive-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Card responsive improvements */
+  .responsive-card {
+    @apply w-full min-w-0;
+    max-width: 100%;
+  }
+
+  /* Text responsive improvements */
+  .responsive-text {
+    @apply text-sm;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  @media (min-width: 768px) {
+    .responsive-text {
+      @apply text-base;
+    }
+  }
+
+  /* Prevent horizontal overflow on small screens */
+  .container-safe {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Mobile-friendly spacing */
+  .mobile-padding {
+    @apply px-4 py-2;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-padding {
+      @apply px-6 py-4;
+    }
+  }
+
+  /* Button responsive sizing */
+  .btn-responsive {
+    @apply px-3 py-2 text-sm;
+  }
+
+  @media (min-width: 768px) {
+    .btn-responsive {
+      @apply px-4 py-2 text-base;
+    }
+  }
+
+  /* Table responsive wrapper */
+  .table-responsive {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .table-responsive table {
+    min-width: 600px;
+  }
+
+  /* Flex responsive improvements */
+  .flex-responsive {
+    @apply flex flex-col;
+  }
+
+  @media (min-width: 768px) {
+    .flex-responsive {
+      @apply flex-row;
+    }
+  }
+
+  /* Mobile-specific adjustments */
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .text-3xl {
+      @apply text-2xl;
+    }
+
+    .text-2xl {
+      @apply text-xl;
+    }
+
+    .px-6 {
+      @apply px-4;
+    }
+
+    .py-6 {
+      @apply py-4;
+    }
+  }
+
+  /* Prevent sidebar positioning issues */
+  [dir="rtl"] .sidebar-container {
+    position: relative;
+  }
+
+  /* Fix flex layouts without causing shifts */
+  [dir="rtl"] .safe-flex {
+    display: flex;
+    flex-direction: row;
+  }
+
+  [dir="rtl"] .safe-flex.reverse {
+    flex-direction: row-reverse;
+  }
+
+  [dir="rtl"] input,
+  [dir="rtl"] textarea,
+  [dir="rtl"] select {
+    text-align: right;
+  }
+
+  [dir="rtl"] .flex-row-reverse {
+    flex-direction: row-reverse;
+  }
+
+  /* Fix for buttons and interactive elements in RTL */
+  [dir="rtl"] button {
+    text-align: center;
+  }
+
+  /* Better RTL support - remove direction override that causes shifting */
+  [dir="rtl"] .flex {
+    flex-direction: row;
+  }
+
+  /* Enhanced Mobile Touch Optimizations */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Fix double-tap issues on mobile */
+  a,
+  button,
+  [role="button"],
+  .clickable {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Allow text selection for inputs and content areas */
+  input,
+  textarea,
+  [contenteditable],
+  .selectable {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+
+  /* Improve touch targets for mobile */
+  button,
+  [role="button"],
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  /* Performance optimizations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* Smooth scrolling with momentum */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Fast click - reduce 300ms delay on mobile */
+  .fast-click {
+    touch-action: manipulation;
+  }
+
+  /* Mobile-optimized cards */
+  .mobile-card {
+    @apply rounded-lg border border-gray-200 bg-white shadow-sm;
+    touch-action: manipulation;
+    transform: translateZ(0);
+    transition: all 0.2s ease-out;
+  }
+
+  @media (hover: hover) {
+    .mobile-card:hover {
+      @apply shadow-md;
+      transform: translateZ(0) translateY(-1px);
+    }
+  }
+
+  .mobile-card:active {
+    @apply shadow-sm;
+    transform: translateZ(0) scale(0.98);
+  }
+
+  /* Improved button states for mobile */
+  .mobile-button {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    touch-action: manipulation;
+    transform: translateZ(0);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (hover: hover) {
+    .mobile-button:hover {
+      transform: translateZ(0) scale(1.02);
+    }
+  }
+
+  .mobile-button:active {
+    transform: translateZ(0) scale(0.98);
+  }
+
+  /* Fix viewport issues on mobile */
+  @media screen and (max-width: 768px) {
+    .mobile-viewport-fix {
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+
+    /* Prevent zoom on inputs on iOS */
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+
+  /* Better focus states for keyboard navigation */
+  .focus-visible:focus-visible {
+    outline: 2px solid theme("colors.green.500");
+    outline-offset: 2px;
+  }
+
+  /* Loading states */
+  .loading-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Performance: Enable hardware acceleration for animated elements */
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  /* Reduce animations on slow devices */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Mobile Performance Optimizations */
+@layer utilities {
+  /* Smooth scrollbar for mobile */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 2px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(107, 114, 128, 0.7);
+  }
+  
+  .scrollbar-track-gray-100::-webkit-scrollbar-track {
+    background: rgb(243, 244, 246);
+  }
+  
+  .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+    background-color: rgb(209, 213, 219);
+  }
+
+  /* Touch optimization */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Performance optimizations */
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .gpu-accelerated {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Text truncation utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Mobile-specific animations */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Mobile viewport fixes */
+  .mobile-vh-fix {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  /* Safe area for mobile devices with notches */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  /* Reduce motion for better performance on mobile */
+  .motion-safe\:animate-pulse {
+    animation-duration: 2s;
+  }
+
+  /* Optimize text rendering on mobile */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+  }
+
+  /* Improve touch targets */
+  button, 
+  a, 
+  input, 
+  select, 
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent zoom on input focus */
+  input, 
+  select, 
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Tablet-specific optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Tablet-specific touch improvements */
+  .hover\:scale-105:hover {
+    transform: scale(1.02);
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .scrollbar-thin {
+    scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(75, 85, 99, 0.5);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(55, 65, 81, 0.7);
+  }
+}
+
+/* RTL optimizations for Arabic */
+[dir="rtl"] {
+  .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+  }
+}
+
+/* Fix for iOS Safari viewport height issues */
+@supports (-webkit-touch-callout: none) {
+  .mobile-vh-fix {
+    min-height: -webkit-fill-available;
+  }
+}

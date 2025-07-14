@@ -1,0 +1,147 @@
+[
+  {
+    "id": "EMP-001",
+    "name": "غيث الخطيب",
+    "position": "مشغل آلة",
+    "salary": 9000,
+    "paid": 5200,
+    "remaining": 3800,
+    "hoursWorked": 200,
+    "shift": "الصباحية",
+    "absences": 3,
+    "overtime": 12,
+    "status": "active",
+    "lastWorkDate": "2025-07-14",
+    "hireDate": "2023-06-01",
+    "department": "Production",
+    "emergencyContact": "+218-91-111-2222",
+    "notes": "موظف مجتهد ومتعاون، يحتاج تدريب على التقنيات الجديدة",
+    "attendance": [
+      {
+        "date": "2025-07-13",
+        "status": "present",
+        "timestamp": "2025-07-13T13:34:47.643Z"
+      },
+      {
+        "date": "2025-07-14",
+        "status": "present",
+        "timestamp": "2025-07-13T13:40:04.258Z"
+      },
+      {
+        "date": "2025-07-13",
+        "status": "absent",
+        "timestamp": "2025-07-13T13:40:18.300Z"
+      },
+      {
+        "date": "2025-07-13",
+        "status": "absent",
+        "timestamp": "2025-07-13T13:40:25.582Z"
+      },
+      {
+        "date": "2025-07-13",
+        "status": "present",
+        "timestamp": "2025-07-13T13:48:19.465Z"
+      },
+      {
+        "date": "2025-07-14",
+        "status": "present",
+        "timestamp": "2025-07-14T08:12:26.031Z"
+      }
+    ]
+  },
+  {
+    "id": "EMP-002",
+    "name": "محمد حج محمد",
+    "position": "مراقب جودة",
+    "salary": 8500,
+    "paid": 8500,
+    "remaining": 0,
+    "hoursWorked": 184,
+    "shift": "المسائية",
+    "absences": 3,
+    "overtime": 8,
+    "status": "active",
+    "lastWorkDate": "2025-07-14",
+    "hireDate": "2023-03-15",
+    "department": "Quality Control",
+    "emergencyContact": "+218-92-333-4444",
+    "notes": "موظف ممتاز في مراقبة الجودة، دقيق في عمله ولا يفوت أي تفاصيل",
+    "attendance": [
+      {
+        "date": "2025-07-12",
+        "status": "absent",
+        "timestamp": "2025-07-13T13:48:09.049Z"
+      },
+      {
+        "date": "2025-07-13",
+        "status": "absent",
+        "timestamp": "2025-07-13T13:48:30.379Z"
+      },
+      {
+        "date": "2025-07-14",
+        "status": "present",
+        "timestamp": "2025-07-14T07:45:13.911Z"
+      }
+    ]
+  },
+  {
+    "id": "EMP-003",
+    "name": "عبدالله الخطيب",
+    "position": "فني صيانة",
+    "salary": 7500,
+    "paid": 3000,
+    "remaining": 4500,
+    "hoursWorked": 160,
+    "shift": "الصباحية",
+    "absences": 3,
+    "overtime": 4,
+    "status": "active",
+    "lastWorkDate": "2025-07-14",
+    "hireDate": "2023-09-01",
+    "department": "Maintenance",
+    "emergencyContact": "+218-93-555-6666",
+    "notes": "في إجازة مرضية، يحتاج متابعة طبية قبل العودة للعمل",
+    "attendance": [
+      {
+        "date": "2025-07-14",
+        "status": "present",
+        "timestamp": "2025-07-14T07:45:25.880Z"
+      }
+    ]
+  },
+  {
+    "id": "EMP-1752410228946",
+    "name": "يوسف",
+    "position": "قائد",
+    "salary": 20000,
+    "shift": "",
+    "department": "",
+    "emergencyContact": "",
+    "paid": 0,
+    "remaining": 20000,
+    "hoursWorked": 0,
+    "absences": 0,
+    "overtime": 0,
+    "status": "active",
+    "lastWorkDate": "2025-07-13",
+    "hireDate": "2025-07-13",
+    "notes": ""
+  },
+  {
+    "id": "EMP-1752411552003",
+    "name": "شسيشس",
+    "position": "شسيشسي",
+    "salary": 22222,
+    "shift": "الصباحية",
+    "department": "",
+    "emergencyContact": "",
+    "paid": 0,
+    "remaining": 22222,
+    "hoursWorked": 0,
+    "absences": 0,
+    "overtime": 0,
+    "status": "active",
+    "lastWorkDate": "2025-07-13",
+    "hireDate": "2025-07-13"
+  }
+]

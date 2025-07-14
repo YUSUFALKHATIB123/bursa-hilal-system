@@ -1,0 +1,95 @@
+[
+  {
+    "id": "ORD-001",
+    "customer": "Libya Textile Co.",
+    "date": "2025-01-15",
+    "status": "processing",
+    "total": 18000,
+    "items": 1,
+    "deadline": "2025-01-25",
+    "product": "Jacquard Velvet",
+    "quantity": "1200 meters",
+    "colors": "Gold, Cream, Beige",
+    "depositPaid": 3000,
+    "remaining": 15000,
+    "paymentMethod": "Wire Transfer",
+    "notes": "Special packaging requested"
+  },
+  {
+    "id": "ORD-002",
+    "customer": "Ahmed Textiles Ltd.",
+    "date": "2025-01-14",
+    "status": "processing",
+    "total": 15420,
+    "items": 3,
+    "deadline": "2025-01-22"
+  },
+  {
+    "id": "ORD-003",
+    "customer": "Cairo Fashion House",
+    "date": "2025-01-13",
+    "status": "completed",
+    "total": 8750,
+    "items": 2,
+    "deadline": "2025-01-20"
+  },
+  {
+    "id": "ORD-004",
+    "customer": "Alexandria Garments",
+    "date": "2025-01-12",
+    "status": "pending",
+    "total": 22100,
+    "items": 5,
+    "deadline": "2025-01-30"
+  },
+  {
+    "id": "ORD-005",
+    "customer": "Modern Textiles Co.",
+    "date": "2025-01-11",
+    "status": "processing",
+    "total": 12300,
+    "items": 4,
+    "deadline": "2025-01-28"
+  },
+  {
+    "id": "ORD-006",
+    "customer": "Elite Fashion",
+    "date": "2025-01-10",
+    "status": "cancelled",
+    "total": 9800,
+    "items": 2,
+    "deadline": "2025-01-22"
+  },
+  {
+    "id": "ORD-430035",
+    "customer": "Test Customer",
+    "product": "Test Product",
+    "quantity": "100 units",
+    "colors": "Red, Blue",
+    "deadline": "2025-02-01",
+    "total": 5000,
+    "deposit": 1000,
+    "remaining": 4000,
+    "status": "pending",
+    "date": "2025-07-12",
+    "notes": "Test order from API",
+    "paymentMethod": "Pending",
+    "items": 1
+  },
+  {
+    "id": "ORD-693424",
+    "customer": "jad",
+    "product": "Jacquard Velvet",
+    "quantity": "1200",
+    "colors": "GOLD",
+    "deadline": "2025-07-12",
+    "total": 1500,
+    "deposit": 200,
+    "remaining": 1300,
+    "status": "pending",
+    "date": "2025-07-12",
+    "notes": "سينشي",
+    "paymentMethod": "Pending",
+    "items": 1
+  }
+]

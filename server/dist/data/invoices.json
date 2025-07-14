@@ -1,0 +1,111 @@
+
+[
+    {
+      "id": "INV-TEST-001",
+      "invoiceNumber": "INV-TEST-001",
+      "customer": "شركة ABC",
+      "customerEmail": "info@abc-company.com",
+      "customerPhone": "+218-91-234-5678",
+      "customerAddress": "طرابلس، ليبيا",
+      "date": "2025-01-09",
+      "dueDate": "2025-02-08",
+      "type": "sales",
+      "typeLabel": "فاتورة بيع",
+      "items": [
+        {
+          "id": 1,
+          "description": "قماش جاكار",
+          "quantity": 120,
+          "unit": "متر",
+          "unitPrice": 10,
+          "total": 1200
+        },
+        {
+          "id": 2,
+          "description": "قماش مخمل",
+          "quantity": 50,
+          "unit": "متر",
+          "unitPrice": 8,
+          "total": 400
+        }
+      ],
+      "subtotal": 1600,
+      "tax": 300,
+      "total": 1900,
+      "amountReceived": 1000,
+      "amountRemaining": 900,
+      "paymentStatus": "partial",
+      "paymentMethod": "bank_transfer",
+      "notes": "دفعة أولى مستلمة، باقي المبلغ خلال 30 يوم",
+      "createdDate": "2025-01-09",
+      "lastPaymentDate": "2025-01-09",
+      "isOverdue": false
+    },
+    {
+      "id": "INV-002",
+      "invoiceNumber": "INV-002",
+      "customer": "Libya Textile Co.",
+      "customerEmail": "orders@libyan-textile.ly",
+      "customerPhone": "+218-21-345-6789",
+      "customerAddress": "بنغازي، ليبيا",
+      "date": "2025-01-08",
+      "dueDate": "2025-02-07",
+      "type": "sales",
+      "typeLabel": "فاتورة بيع",
+      "items": [
+        {
+          "id": 1,
+          "description": "Jacquard Velvet",
+          "quantity": 1200,
+          "unit": "meter",
+          "unitPrice": 15,
+          "total": 18000
+        }
+      ],
+      "subtotal": 18000,
+      "tax": 0,
+      "total": 18000,
+      "amountReceived": 18000,
+      "amountRemaining": 0,
+      "paymentStatus": "paid",
+      "paymentMethod": "wire_transfer",
+      "notes": "Payment completed in full",
+      "createdDate": "2025-01-08",
+      "lastPaymentDate": "2025-01-08",
+      "isOverdue": false
+    },
+    {
+      "id": "INV-003",
+      "invoiceNumber": "INV-003",
+      "customer": "Cairo Fashion House",
+      "customerEmail": "finance@cairo-fashion.eg",
+      "customerPhone": "+20-2-123-4567",
+      "customerAddress": "القاهرة، مصر",
+      "date": "2024-12-15",
+      "dueDate": "2025-01-14",
+      "type": "sales",
+      "typeLabel": "فاتورة بيع",
+      "items": [
+        {
+          "id": 1,
+          "description": "Velvet Red",
+          "quantity": 300,
+          "unit": "meter",
+          "unitPrice": 12,
+          "total": 3600
+        }
+      ],
+      "subtotal": 3600,
+      "tax": 360,
+      "total": 3960,
+      "amountReceived": 0,
+      "amountRemaining": 3960,
+      "paymentStatus": "unpaid",
+      "paymentMethod": "cash",
+      "notes": "Payment overdue - follow up required",
+      "createdDate": "2024-12-15",
+      "lastPaymentDate": null,
+      "isOverdue": true
+    }
+]
+
