@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 import { handleDemo } from "./routes/demo.js";
 import ordersRouter from "./routes/orders.js";
 import invoicesRouter from "./routes/invoices.js";
@@ -11,6 +12,8 @@ import financialsRouter from "./routes/financials.js";
 import suppliersRouter from "./routes/suppliers.js";
 export function createServer() {
     const app = express();
+    // تقديم ملفات public
+    app.use(express.static(path.join(process.cwd(), "client/public")));
     // Middleware
     app.use(cors());
     app.use(express.json());

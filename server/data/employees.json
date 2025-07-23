@@ -3,19 +3,19 @@
     "id": "EMP-001",
     "name": "غيث الخطيب",
     "position": "مشغل آلة",
-    "salary": 9000,
-    "paid": 5200,
+    "salary": 9100,
+    "paid": 5300,
     "remaining": 3800,
-    "hoursWorked": 200,
+    "hoursWorked": 208,
     "shift": "الصباحية",
-    "absences": 3,
+    "absences": 4,
     "overtime": 12,
-    "status": "active",
-    "lastWorkDate": "2025-07-14",
+    "status": "absent",
+    "lastWorkDate": "2025-07-20",
     "hireDate": "2023-06-01",
     "department": "Production",
     "emergencyContact": "+218-91-111-2222",
-    "notes": "موظف مجتهد ومتعاون، يحتاج تدريب على التقنيات الجديدة",
+    "notes": "اختبار",
     "attendance": [
       {
         "date": "2025-07-13",
@@ -46,8 +46,35 @@
         "date": "2025-07-14",
         "status": "present",
         "timestamp": "2025-07-14T08:12:26.031Z"
+      },
+      {
+        "date": "2025-07-19",
+        "status": "present",
+        "timestamp": "2025-07-19T08:21:48.941Z"
+      },
+      {
+        "date": "2025-07-20",
+        "status": "present",
+        "timestamp": "2025-07-20T15:01:13.374Z",
+        "note": ""
+      },
+      {
+        "date": "2025-07-22",
+        "status": "absent",
+        "timestamp": "2025-07-22T08:20:19.447Z",
+        "note": ""
       }
-    ]
+    ],
+    "salaryTransactions": [
+      {
+        "date": "2025-07-19",
+        "type": "مكافأة",
+        "amount": 100,
+        "timestamp": "2025-07-19T20:44:11.493Z",
+        "description": "مكافأة: +100 ₺"
+      }
+    ],
+    "dailyHours": 8
   },
   {
     "id": "EMP-002",
@@ -58,9 +85,9 @@
     "remaining": 0,
     "hoursWorked": 184,
     "shift": "المسائية",
-    "absences": 3,
+    "absences": 5,
     "overtime": 8,
-    "status": "active",
+    "status": "absent",
     "lastWorkDate": "2025-07-14",
     "hireDate": "2023-03-15",
     "department": "Quality Control",
@@ -81,6 +108,17 @@
         "date": "2025-07-14",
         "status": "present",
         "timestamp": "2025-07-14T07:45:13.911Z"
+      },
+      {
+        "date": "2025-07-19",
+        "status": "absent",
+        "timestamp": "2025-07-19T20:47:45.162Z"
+      },
+      {
+        "date": "2025-07-22",
+        "status": "absent",
+        "timestamp": "2025-07-22T08:20:39.383Z",
+        "note": ""
       }
     ]
   },
@@ -91,12 +129,12 @@
     "salary": 7500,
     "paid": 3000,
     "remaining": 4500,
-    "hoursWorked": 160,
+    "hoursWorked": 176,
     "shift": "الصباحية",
-    "absences": 3,
+    "absences": 4,
     "overtime": 4,
     "status": "active",
-    "lastWorkDate": "2025-07-14",
+    "lastWorkDate": "2025-07-22",
     "hireDate": "2023-09-01",
     "department": "Maintenance",
     "emergencyContact": "+218-93-555-6666",
@@ -106,6 +144,22 @@
         "date": "2025-07-14",
         "status": "present",
         "timestamp": "2025-07-14T07:45:25.880Z"
+      },
+      {
+        "date": "2025-07-17",
+        "status": "present",
+        "timestamp": "2025-07-17T11:32:50.645Z"
+      },
+      {
+        "date": "2025-07-18",
+        "status": "absent",
+        "timestamp": "2025-07-18T07:59:42.200Z"
+      },
+      {
+        "date": "2025-07-22",
+        "status": "present",
+        "timestamp": "2025-07-22T08:19:58.164Z",
+        "note": ""
       }
     ]
   },
@@ -120,12 +174,20 @@
     "paid": 0,
     "remaining": 20000,
     "hoursWorked": 0,
-    "absences": 0,
+    "absences": 1,
     "overtime": 0,
-    "status": "active",
+    "status": "absent",
     "lastWorkDate": "2025-07-13",
     "hireDate": "2025-07-13",
-    "notes": ""
+    "notes": "",
+    "attendance": [
+      {
+        "date": "2025-07-22",
+        "status": "absent",
+        "timestamp": "2025-07-22T08:23:49.301Z",
+        "note": ""
+      }
+    ]
   },
   {
     "id": "EMP-1752411552003",
@@ -138,10 +200,18 @@
     "paid": 0,
     "remaining": 22222,
     "hoursWorked": 0,
-    "absences": 0,
+    "absences": 1,
     "overtime": 0,
-    "status": "active",
+    "status": "absent",
     "lastWorkDate": "2025-07-13",
-    "hireDate": "2025-07-13"
+    "hireDate": "2025-07-13",
+    "attendance": [
+      {
+        "date": "2025-07-22",
+        "status": "absent",
+        "timestamp": "2025-07-22T08:24:07.968Z",
+        "note": ""
+      }
+    ]
   }
 ]

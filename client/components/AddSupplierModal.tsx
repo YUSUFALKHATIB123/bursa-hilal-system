@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Building2, Upload } from "lucide-react";
 import { toast } from 'react-toastify';
+import { useLanguage } from "../contexts/LanguageContext";
+import apiService from "../services/api";
 
 interface AddSupplierModalProps {
   isOpen: boolean;
@@ -12,6 +14,7 @@ export default function AddSupplierModal({
   isOpen,
   onClose,
 }: AddSupplierModalProps) {
+  const { language, t } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     contact: "",
@@ -22,11 +25,14 @@ export default function AddSupplierModal({
     rating: "5",
     notes: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("New supplier:", formData);
-    toast.success("Supplier added successfully!", {
+    setLoading(true);
+    try {
+      await apiService.createSupplier(formData);
+      toast.success(t("addSuccess") || "تمت الإضافة بنجاح!", {
       position: "top-center",
       autoClose: 3000,
       hideProgressBar: false,
@@ -45,6 +51,11 @@ export default function AddSupplierModal({
       rating: "5",
       notes: "",
     });
+    } catch (error) {
+      toast.error(t("errorOccurred") || "حدث خطأ!", { position: "top-center" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (
@@ -79,7 +90,7 @@ export default function AddSupplierModal({
             <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-primary to-green-secondary text-white">
               <div className="flex items-center space-x-3">
                 <Building2 className="w-6 h-6" />
-                <h2 className="text-xl font-bold">Add New Supplier</h2>
+                <h2 className="text-xl font-bold">{t("addSupplier") || "إضافة مورد جديد"}</h2>
               </div>
               <button
                 onClick={onClose}
@@ -95,14 +106,14 @@ export default function AddSupplierModal({
                 {/* Company Name */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Name *
+                    {language === "ar" ? "اسم الشركة" : "Company Name"} *
                   </label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="ABC Textiles Factory"
+                    placeholder=""
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
                   />
@@ -111,14 +122,14 @@ export default function AddSupplierModal({
                 {/* Contact Person */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Contact Person *
+                    {language === "ar" ? "اسم جهة الاتصال" : "Contact Person"} *
                   </label>
                   <input
                     type="text"
                     name="contact"
                     value={formData.contact}
                     onChange={handleChange}
-                    placeholder="Ahmed Al-Mansouri"
+                    placeholder=""
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
                   />
@@ -127,14 +138,14 @@ export default function AddSupplierModal({
                 {/* Phone */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number *
+                    {language === "ar" ? "رقم الهاتف" : "Phone Number"} *
                   </label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="+20-123-456-789"
+                    placeholder=""
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
                   />
@@ -143,14 +154,14 @@ export default function AddSupplierModal({
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    {t("emailAddress") || "البريد الإلكتروني"}
                   </label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="contact@abctextiles.com"
+                    placeholder=""
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
                   />
                 </div>
@@ -158,14 +169,14 @@ export default function AddSupplierModal({
                 {/* Location */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location
+                    {language === "ar" ? "الموقع" : "Location"}
                   </label>
                   <input
                     type="text"
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
-                    placeholder="Cairo, Egypt"
+                    placeholder=""
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
                   />
                 </div>
@@ -173,7 +184,7 @@ export default function AddSupplierModal({
                 {/* Specialization */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Specialization
+                    {language === "ar" ? "التخصص" : "Specialization"}
                   </label>
                   <select
                     name="specialization"
@@ -181,26 +192,20 @@ export default function AddSupplierModal({
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
                   >
-                    <option value="">Select Specialization</option>
-                    <option value="Cotton Manufacturing">
-                      Cotton Manufacturing
-                    </option>
-                    <option value="Silk Production">Silk Production</option>
-                    <option value="Wool Processing">Wool Processing</option>
-                    <option value="Dyeing Services">Dyeing Services</option>
-                    <option value="Finishing Services">
-                      Finishing Services
-                    </option>
-                    <option value="Equipment Supplier">
-                      Equipment Supplier
-                    </option>
+                    <option value="">{t("selectSpecialization") || "اختر التخصص"}</option>
+                    <option value="Cotton Manufacturing">{language === "ar" ? "تصنيع القطن" : "Cotton Manufacturing"}</option>
+                    <option value="Silk Production">{language === "ar" ? "إنتاج الحرير" : "Silk Production"}</option>
+                    <option value="Wool Processing">{language === "ar" ? "معالجة الصوف" : "Wool Processing"}</option>
+                    <option value="Dyeing Services">{language === "ar" ? "خدمات الصباغة" : "Dyeing Services"}</option>
+                    <option value="Finishing Services">{language === "ar" ? "خدمات التشطيب" : "Finishing Services"}</option>
+                    <option value="Equipment Supplier">{language === "ar" ? "مورد معدات" : "Equipment Supplier"}</option>
                   </select>
                 </div>
 
                 {/* Service Rating */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Initial Rating
+                    {language === "ar" ? "التقييم المبدئي" : "Initial Rating"}
                   </label>
                   <select
                     name="rating"
@@ -208,11 +213,11 @@ export default function AddSupplierModal({
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
                   >
-                    <option value="5">★★★★★ (5 stars)</option>
-                    <option value="4">★★★★☆ (4 stars)</option>
-                    <option value="3">★★★☆☆ (3 stars)</option>
-                    <option value="2">★★☆☆☆ (2 stars)</option>
-                    <option value="1">★☆☆☆☆ (1 star)</option>
+                    <option value="5">★★★★★ {language === "ar" ? "(5 نجوم)" : "(5 stars)"}</option>
+                    <option value="4">★★★★☆ {language === "ar" ? "(4 نجوم)" : "(4 stars)"}</option>
+                    <option value="3">★★★☆☆ {language === "ar" ? "(3 نجوم)" : "(3 stars)"}</option>
+                    <option value="2">★★☆☆☆ {language === "ar" ? "(2 نجوم)" : "(2 stars)"}</option>
+                    <option value="1">★☆☆☆☆ {language === "ar" ? "(نجمة واحدة)" : "(1 star)"}</option>
                   </select>
                 </div>
               </div>
@@ -220,14 +225,14 @@ export default function AddSupplierModal({
               {/* Notes */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Additional Notes
+                  {language === "ar" ? "ملاحظات إضافية" : "Additional Notes"}
                 </label>
                 <textarea
                   name="notes"
                   value={formData.notes}
                   onChange={handleChange}
                   rows={3}
-                  placeholder="Additional information about the supplier, past experience, quality notes, etc."
+                  placeholder=""
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent resize-none"
                 />
               </div>
@@ -235,14 +240,14 @@ export default function AddSupplierModal({
               {/* File Upload Section */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Attach Files/Photos (Optional)
+                  {t("attachFiles") || "إرفاق ملفات/صور (اختياري)"}
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-green-400 transition-colors">
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-600 text-sm">
-                    Drop files here or{" "}
+                    {language === "ar" ? "اسحب الملفات هنا أو " : "Drop files here or "}
                     <label className="text-green-600 hover:text-green-700 cursor-pointer">
-                      browse
+                      {language === "ar" ? "تصفح" : "browse"}
                       <input
                         type="file"
                         multiple
@@ -252,7 +257,7 @@ export default function AddSupplierModal({
                     </label>
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    Supports images, PDF, DOC files
+                    {language === "ar" ? "يدعم الصور وملفات PDF وDOC" : "Supports images, PDF, DOC files"}
                   </p>
                 </div>
               </div>
@@ -262,16 +267,18 @@ export default function AddSupplierModal({
                 <button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2"
+                  disabled={loading}
                 >
                   <Plus className="w-5 h-5" />
-                  <span>Add Supplier</span>
+                  <span>{t("addSupplier") || "إضافة مورد"}</span>
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
                   className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  disabled={loading}
                 >
-                  Cancel
+                  {t("cancel") || "إلغاء"}
                 </button>
               </div>
             </form>

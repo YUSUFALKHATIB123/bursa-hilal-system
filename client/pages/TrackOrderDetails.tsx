@@ -53,43 +53,43 @@ const generateDefaultTimeline = (orderId: string, status: string, timelineNotes:
   const stages = [
     {
       id: "1",
-      title: "Order Received",
+      title: language === "ar" ? "تم استلام الطلب" : "Order Received",
       icon: Package,
       color: "bg-blue-500",
     },
     {
       id: "2", 
-      title: "Sent to Dyeing",
+      title: language === "ar" ? "تم الإرسال للصباغة" : "Sent to Dyeing",
       icon: Palette,
       color: "bg-purple-500",
     },
     {
       id: "3",
-      title: "Back from Dyeing", 
+      title: language === "ar" ? "العودة من الصباغة" : "Back from Dyeing", 
       icon: CheckCircle,
       color: "bg-green-500",
     },
     {
       id: "4",
-      title: "Sent to Stitching",
+      title: language === "ar" ? "تم الإرسال للخياطة" : "Sent to Stitching",
       icon: Scissors,
       color: "bg-orange-500",
     },
     {
       id: "5",
-      title: "Quality Check",
+      title: language === "ar" ? "فحص الجودة" : "Quality Check",
       icon: Shield,
       color: "bg-yellow-500",
     },
     {
       id: "6",
-      title: "Ready for Delivery",
+      title: language === "ar" ? "جاهز للتسليم" : "Ready for Delivery",
       icon: PlayCircle,
       color: "bg-indigo-500",
     },
     {
       id: "7",
-      title: "Delivered",
+      title: language === "ar" ? "تم التسليم" : "Delivered",
       icon: Truck,
       color: "bg-gray-500",
     },
@@ -300,14 +300,14 @@ export default function TrackOrderDetails() {
       {/* Breadcrumb */}
       <nav className="flex text-sm text-gray-500">
         <Link to="/dashboard" className="hover:text-gray-700">
-          Dashboard
+          {language === "ar" ? "لوحة التحكم" : "Dashboard"}
         </Link>
         <span className="mx-2">/</span>
         <Link to="/track-order" className="hover:text-gray-700">
-          Track Orders
+          {language === "ar" ? "تتبع الطلبات" : "Track Orders"}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">Order Details</span>
+        <span className="text-gray-900">{language === "ar" ? "تفاصيل الطلب" : "Order Details"}</span>
       </nav>
 
       {/* Header */}
@@ -324,8 +324,8 @@ export default function TrackOrderDetails() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Order Details</h1>
-            <p className="text-gray-600">Order ID: {orderDetails.id}</p>
+            <h1 className="text-3xl font-bold text-gray-900">{language === "ar" ? "تفاصيل الطلب" : "Order Details"}</h1>
+            <p className="text-gray-600">{language === "ar" ? `معرّف الطلب: ${orderDetails.id}` : `Order ID: ${orderDetails.id}`}</p>
           </div>
         </div>
       </motion.div>
@@ -345,15 +345,15 @@ export default function TrackOrderDetails() {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           <div>
-            <p className="text-green-100 text-sm">Quantity</p>
+            <p className="text-green-100 text-sm">{language === "ar" ? "الكمية" : "Quantity"}</p>
             <p className="text-white font-semibold text-lg">{orderDetails.quantity}</p>
           </div>
           <div>
-            <p className="text-green-100 text-sm">Colors</p>
+            <p className="text-green-100 text-sm">{language === "ar" ? "الألوان" : "Colors"}</p>
             <p className="text-white font-semibold">{orderDetails.colors}</p>
           </div>
           <div>
-            <p className="text-green-100 text-sm">Order Date</p>
+            <p className="text-green-100 text-sm">{language === "ar" ? "تاريخ الطلب" : "Order Date"}</p>
             <p className="text-white font-semibold">{orderDetails.date}</p>
           </div>
         </div>
@@ -365,7 +365,7 @@ export default function TrackOrderDetails() {
             className="mt-4 p-4 bg-blue-500 bg-opacity-20 rounded-lg"
           >
             <p className="text-sm text-blue-100">
-              <strong>Order Notes:</strong> {orderDetails.notes}
+              <strong>{language === "ar" ? "ملاحظات الطلب:" : "Order Notes:"}</strong> {orderDetails.notes}
             </p>
           </motion.div>
         )}
@@ -379,14 +379,14 @@ export default function TrackOrderDetails() {
       >
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <Clock className="w-5 h-5 mr-2" />
-          Progress Overview
+          {language === "ar" ? "نظرة عامة على التقدم" : "Progress Overview"}
         </h3>
         
         <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">Overall Progress</span>
+            <span className="text-sm font-medium text-gray-700">{language === "ar" ? "التقدم الكلي" : "Overall Progress"}</span>
             <span className="text-sm text-gray-500">
-              {timelineSteps.filter(s => s.completed).length} of {timelineSteps.length} steps completed
+              {language === "ar" ? `${timelineSteps.filter(s => s.completed).length} من ${timelineSteps.length} مرحلة مكتملة` : `${timelineSteps.filter(s => s.completed).length} of ${timelineSteps.length} steps completed`}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">

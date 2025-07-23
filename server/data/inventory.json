@@ -1,64 +1,64 @@
-
 [
-    {
-      "id": "INV-001",
-      "type": "Jacquard",
-      "color": "Green",
-      "quantity": 5000,
-      "unit": "meters",
-      "price": 4.5,
-      "location": "Warehouse A",
-      "supplier": "Local Supplier 1",
-      "lastRestocked": "2025-01-01",
-      "minimumThreshold": 1000
-    },
-    {
-      "id": "INV-002",
-      "type": "Velvet",
-      "color": "Red",
-      "quantity": 2300,
-      "unit": "meters",
-      "price": 6.2,
-      "location": "Warehouse A",
-      "supplier": "Turkish Textile Co.",
-      "lastRestocked": "2024-12-25",
-      "minimumThreshold": 1000
-    },
-    {
-      "id": "INV-003",
-      "type": "Nubuk",
-      "color": "Beige",
-      "quantity": 1500,
-      "unit": "meters",
-      "price": 5.8,
-      "location": "Warehouse B",
-      "supplier": "Italian Fabrics Ltd.",
-      "lastRestocked": "2024-12-20",
-      "minimumThreshold": 1000
-    },
-    {
-      "id": "INV-004",
-      "type": "Babyface",
-      "color": "Blue",
-      "quantity": 800,
-      "unit": "meters",
-      "price": 7.1,
-      "location": "Warehouse B",
-      "supplier": "Premium Textiles",
-      "lastRestocked": "2024-12-15",
-      "minimumThreshold": 1000
-    },
-    {
-      "id": "INV-005",
-      "type": "Bouclé",
-      "color": "White",
-      "quantity": 1200,
-      "unit": "meters",
-      "price": 5.4,
-      "location": "Warehouse A",
-      "supplier": "European Fabrics",
-      "lastRestocked": "2024-12-30",
-      "minimumThreshold": 1000
-    }
+  {
+    "id": "INV-001",
+    "type": "Jacquard",
+    "color": "Green",
+    "quantity": 4800,
+    "unit": "meters",
+    "price": 4.5,
+    "location": "Warehouse A",
+    "supplier": "Local Supplier 1",
+    "lastRestocked": "2025-01-01",
+    "minimumThreshold": 1000,
+    "updatedAt": "2025-07-22T11:44:04.216Z"
+  },
+  {
+    "id": "INV-002",
+    "type": "Velvet",
+    "color": "Red",
+    "quantity": 2400,
+    "unit": "meters",
+    "price": 6.2,
+    "location": "Warehouse A",
+    "supplier": "Turkish Textile Co.",
+    "lastRestocked": "2025-07-22",
+    "minimumThreshold": 1000,
+    "updatedAt": "2025-07-22T12:30:23.271Z"
+  },
+  {
+    "id": "INV-003",
+    "type": "Nubuk",
+    "color": "Beige",
+    "quantity": 1500,
+    "unit": "meters",
+    "price": 5.8,
+    "location": "Warehouse B",
+    "supplier": "Italian Fabrics Ltd.",
+    "lastRestocked": "2024-12-20",
+    "minimumThreshold": 1000
+  },
+  {
+    "id": "INV-004",
+    "type": "Babyface",
+    "color": "Blue",
+    "quantity": 800,
+    "unit": "meters",
+    "price": 7.1,
+    "location": "Warehouse B",
+    "supplier": "Premium Textiles",
+    "lastRestocked": "2024-12-15",
+    "minimumThreshold": 1000
+  },
+  {
+    "id": "INV-005",
+    "type": "Bouclé",
+    "color": "White",
+    "quantity": 1200,
+    "unit": "meters",
+    "price": 5.4,
+    "location": "Warehouse A",
+    "supplier": "European Fabrics",
+    "lastRestocked": "2024-12-30",
+    "minimumThreshold": 1000
+  }
 ]
-

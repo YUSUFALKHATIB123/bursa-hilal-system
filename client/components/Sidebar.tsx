@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import Logo from "./Logo";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -14,6 +15,8 @@ import {
   Building2,
   MapPin,
   Settings,
+  Activity,
+  Trash2,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -82,10 +85,22 @@ const menuItems = [
     permission: "suppliers",
   },
   {
+    path: "/inventory-movements",
+    icon: Activity,
+    label: { en: "Inventory Movements", ar: "حركات المخزون" },
+    permission: "inventory-movements",
+  },
+  {
     path: "/settings",
     icon: Settings,
     label: { en: "Settings", ar: "الإعدادات" },
-    permission: "admin",
+    permission: "settings",
+  },
+  {
+    path: "/trash",
+    icon: Trash2,
+    label: { en: "Trash", ar: "سلة المهملات" },
+    permission: "*",
   },
 ];
 
@@ -107,23 +122,8 @@ export default function Sidebar({ onItemClick }: SidebarProps) {
           transition={{ duration: 0.3 }}
           className={`flex items-center ${language === "ar" ? "space-x-reverse space-x-2 sm:space-x-3" : "space-x-2 sm:space-x-3"}`}
         >
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-primary to-green-secondary rounded-lg flex items-center justify-center flex-shrink-0">
-            <img
-              src="/logo.png"
-              alt="Company Logo"
-              className="w-8 h-8 sm:w-10 sm:h-10 object-contain bg-white rounded shadow"
-              onError={e => {
-                if (e.currentTarget.src.indexOf('logo.png') !== -1) {
-                  e.currentTarget.src = '/logo.jpg';
-                } else if (e.currentTarget.src.indexOf('logo.jpg') !== -1) {
-                  e.currentTarget.src = '/logo';
-                } else if (e.currentTarget.src.indexOf('logo') !== -1) {
-                  e.currentTarget.src = '/logo.PNG';
-                } else {
-                  e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo';
-                }
-              }}
-            />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0 rounded-lg" style={{ background: '#0b3d2e' }}>
+            <span className="text-white text-lg sm:text-xl font-bold select-none">BH</span>
           </div>
           <div className={`min-w-0 ${language === "ar" ? "rtl-content" : ""}`}>
             <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">

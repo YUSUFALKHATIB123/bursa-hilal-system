@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
 
@@ -14,6 +15,7 @@ export default function ProtectedRoute({
   requiredPermission,
 }: ProtectedRouteProps) {
   const { isAuthenticated, hasPermission } = useAuth();
+  const { language } = useLanguage();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -31,13 +33,19 @@ export default function ProtectedRoute({
             <Lock className="w-8 h-8 text-red-600" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Access Denied
+            {language === "ar" ? "غير مصرح بالوصول" : "Access Denied"}
           </h2>
           <p className="text-gray-600 mb-4">
-            You don't have permission to access this section.
+            {language === "ar" 
+              ? "ليس لديك صلاحية للوصول إلى هذا القسم"
+              : "You don't have permission to access this section."
+            }
           </p>
           <p className="text-sm text-gray-500">
-            Contact your administrator if you believe this is an error.
+            {language === "ar"
+              ? "تواصل مع مدير النظام إذا كنت تعتقد أن هذا خطأ"
+              : "Contact your administrator if you believe this is an error."
+            }
           </p>
         </motion.div>
       </div>

@@ -20,7 +20,46 @@ import {
   AlertCircle,
   CheckCircle,
   BarChart3,
+  TrendingUp,
 } from "lucide-react";
+
+// Animated Counter Component
+function AnimatedCounter({
+  value,
+  duration = 2000,
+  suffix = "",
+  prefix = "",
+}: {
+  value: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value, duration]);
+
+  return (
+    <span>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 interface Employee {
   id: string;
@@ -282,6 +321,7 @@ export default function Employees() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showEmployeeDetail, setShowEmployeeDetail] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   // Add employee form state
   const [newEmployee, setNewEmployee] = useState({
@@ -306,6 +346,7 @@ export default function Employees() {
       const data = await apiService.getEmployees();
       console.log('Employees data received:', data); // Debug log
       setEmployees(data || []);
+      setLastUpdate(new Date());
     } catch (error) {
       console.error("Error fetching employees:", error);
       
@@ -326,18 +367,23 @@ export default function Employees() {
     }
   };
 
-  // Calculate real statistics from API data
+  // Calculate real statistics from API data with real-time updates
   const totalSalaries = employees.reduce((sum, emp) => sum + emp.salary, 0);
   const totalPaid = employees.reduce((sum, emp) => sum + emp.paid, 0);
   const totalRemaining = employees.reduce((sum, emp) => sum + emp.remaining, 0);
   const paymentPercentage = totalSalaries > 0 ? (totalPaid / totalSalaries) * 100 : 0;
+
+  // Calculate financial impact for dashboard integration
+  const salaryExpenses = totalPaid; // Current month paid salaries
+  const pendingSalaries = totalRemaining; // Outstanding salaries
+  const salaryEfficiency = totalSalaries > 0 ? (totalPaid / totalSalaries) * 100 : 0;
 
   const handleEmployeeClick = (employee: Employee) => {
     setSelectedEmployee(employee);
     setShowEmployeeDetail(true);
   };
 
-  // Handle add employee
+  // Handle add employee with immediate stats update
   const handleAddEmployee = async () => {
     if (!newEmployee.name || !newEmployee.position || !newEmployee.salary) {
       showErrorToast(
@@ -381,7 +427,9 @@ export default function Employees() {
         emergencyContact: "",
       });
       setShowAddForm(false);
-      fetchEmployees();
+      
+      // Immediate refresh to update stats
+      await fetchEmployees();
       
     } catch (error) {
       console.error("Error adding employee:", error);
@@ -393,6 +441,16 @@ export default function Employees() {
     } finally {
       setAddingEmployee(false);
     }
+  };
+
+  // Enhanced employee update handler with immediate stats refresh
+  const handleEmployeeUpdate = async () => {
+    await fetchEmployees();
+    showSuccessToast(
+      language === "ar" 
+        ? "تم تحديث بيانات الموظف بنجاح" 
+        : "Employee data updated successfully"
+    );
   };
 
   // Loading state
@@ -435,7 +493,7 @@ export default function Employees() {
           </h1>
           <p className="text-gray-600 mt-1">
             {language === "ar"
-              ? "��دارة بيانات الموظفين والرواتب والمهام اليومية"
+              ? "إدارة بيانات الموظفين والرواتب والمهام اليومية"
               : "Manage employee data, salaries, and daily tasks"}
           </p>
         </div>
@@ -463,7 +521,7 @@ export default function Employees() {
                 {language === "ar" ? "إجمالي الموظفين" : "Total Employees"}
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {employees.length}
+                <AnimatedCounter value={employees.length} />
               </p>
             </div>
             <div className="p-3 rounded-lg bg-blue-100 text-blue-600">
@@ -484,7 +542,7 @@ export default function Employees() {
                 {language === "ar" ? "إجمالي الرواتب" : "Total Salaries"}
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {totalSalaries.toLocaleString()} {language === "ar" ? "₺" : "TL"}
+                <AnimatedCounter value={totalSalaries} /> {language === "ar" ? "₺" : "TL"}
               </p>
             </div>
             <div className="p-3 rounded-lg bg-green-100 text-green-600">
@@ -505,7 +563,7 @@ export default function Employees() {
                 {language === "ar" ? "المدفوع" : "Paid"}
               </p>
               <p className="text-2xl font-bold text-green-600">
-                {totalPaid.toLocaleString()} {language === "ar" ? "₺" : "TL"}
+                <AnimatedCounter value={totalPaid} /> {language === "ar" ? "₺" : "TL"}
               </p>
             </div>
             <div className="p-3 rounded-lg bg-green-100 text-green-600">
@@ -526,7 +584,7 @@ export default function Employees() {
                 {language === "ar" ? "المتبقي" : "Remaining"}
               </p>
               <p className="text-2xl font-bold text-orange-600">
-                {totalRemaining.toLocaleString()} {language === "ar" ? "₺" : "TL"}
+                <AnimatedCounter value={totalRemaining} /> {language === "ar" ? "₺" : "TL"}
               </p>
             </div>
             <div className="p-3 rounded-lg bg-orange-100 text-orange-600">
@@ -547,7 +605,7 @@ export default function Employees() {
                 {language === "ar" ? "نسبة الدفع" : "Payment Rate"}
               </p>
               <p className="text-2xl font-bold text-blue-600">
-                {paymentPercentage.toFixed(1)}%
+                <AnimatedCounter value={paymentPercentage} />%
               </p>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                 <div
@@ -558,6 +616,31 @@ export default function Employees() {
             </div>
             <div className="p-3 rounded-lg bg-blue-100 text-blue-600">
               <BarChart3 className="w-6 h-6" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* New Card: Financial Impact */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white rounded-lg border border-gray-200 p-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm">
+                {language === "ar" ? "تأثير على الأرباح" : "Profit Impact"}
+              </p>
+              <p className="text-2xl font-bold text-purple-600">
+                <AnimatedCounter value={salaryExpenses} /> {language === "ar" ? "₺" : "TL"}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {language === "ar" ? "رواتب مدفوعة هذا الشهر" : "Salaries paid this month"}
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-purple-100 text-purple-600">
+              <TrendingUp className="w-6 h-6" />
             </div>
           </div>
         </motion.div>
@@ -664,7 +747,7 @@ export default function Employees() {
           setSelectedEmployee(null);
         }}
         employee={selectedEmployee}
-        onEmployeeUpdate={fetchEmployees}
+        onEmployeeUpdate={handleEmployeeUpdate}
       />
     </motion.div>
   );

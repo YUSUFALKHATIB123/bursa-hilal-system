@@ -1,0 +1,26 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : [{"id":"MOV-001","itemId":"INV-001","type":"Jacquard","color":"Green","quantity":500
+                    ,"operation":"in","user":"admin","date":"2025-01-15","notes":"إضافة مخزون 
+                    جديد","previousQuantity":4500,"newQuantity...
+RawContent        : HTTP/1.1 200 OK
+                    Vary: Origin
+                    Access-Control-Allow-Credentials: true
+                    Connection: keep-alive
+                    Keep-Alive: timeout=5
+                    Content-Length: 693
+                    Content-Type: application/json; charset=utf-8
+                    Date: Tue, 22 ...
+Forms             : {}
+Headers           : {[Vary, Origin], [Access-Control-Allow-Credentials, true], [Connection, 
+                    keep-alive], [Keep-Alive, timeout=5]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 693
+
+
+

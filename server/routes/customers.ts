@@ -83,11 +83,11 @@ router.delete('/:id', (req, res) => {
     try {
         let data = readData();
         if (Array.isArray(data)) {
-            const initialLength = data.length;
-            data = data.filter((i: any) => i.id !== req.params.id);
-            if (data.length < initialLength) {
+            const index = data.findIndex((i: any) => i.id === req.params.id);
+            if (index !== -1) {
+                data[index].isDeleted = true;
                 writeData(data);
-                res.status(204).send();
+                res.status(200).json({ message: 'Customer soft deleted' });
             } else {
                 res.status(404).json({ message: 'Item not found' });
             }

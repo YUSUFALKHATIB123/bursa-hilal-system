@@ -6,16 +6,57 @@ import apiService from "../services/api";
 import AddStockModal from "../components/AddStockModal";
 import UpdateStockModal from "../components/UpdateStockModal";
 import ReorderStockModal from "../components/ReorderStockModal";
+import StockMovementModal from "../components/StockMovementModal";
 import {
   Package,
   Plus,
+  Minus,
   AlertTriangle,
   TrendingDown,
   DollarSign,
   Archive,
   Search,
   Filter,
+  Calendar,
 } from "lucide-react";
+
+// Animated Counter Component
+function AnimatedCounter({
+  value,
+  duration = 2000,
+  suffix = "",
+  prefix = "",
+}: {
+  value: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value, duration]);
+
+  return (
+    <span>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 interface InventoryItem {
   id: string;
@@ -33,10 +74,13 @@ interface InventoryItem {
 export default function Inventory() {
   const { language, t } = useLanguage();
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [stockMovements, setStockMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddStockModal, setShowAddStockModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showReorderModal, setShowReorderModal] = useState(false);
+  const [showStockInModal, setShowStockInModal] = useState(false);
+  const [showStockOutModal, setShowStockOutModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
@@ -50,15 +94,38 @@ export default function Inventory() {
   const fetchInventoryData = async () => {
     try {
       setLoading(true);
-      const data = await apiService.getInventory();
-      setInventoryItems(data || []);
+      const [inventoryData, movementsData] = await Promise.all([
+        apiService.getInventory(),
+        apiService.getStockMovements()
+      ]);
+      setInventoryItems(inventoryData || []);
+      setStockMovements(movementsData || []);
     } catch (error) {
       console.error("Error fetching inventory:", error);
       showErrorToast(language === "ar" ? "خطأ في جلب بيانات المخزون" : "Error fetching inventory data");
       // Fallback to empty array if API fails
       setInventoryItems([]);
+      setStockMovements([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // دالة لجلب آخر حركة للمخزون من البيانات المحفوظة
+  const getLastMovement = (itemId: string) => {
+    try {
+      const itemMovements = stockMovements.filter((movement: any) => movement.itemId === itemId);
+      if (itemMovements.length > 0) {
+        // ترتيب الحركات حسب التاريخ واختيار الأحدث
+        const sortedMovements = itemMovements.sort((a: any, b: any) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        return sortedMovements[0];
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting last movement:", error);
+      return null;
     }
   };
 
@@ -178,10 +245,10 @@ export default function Inventory() {
                 {language === "ar" ? "تنبيه نقص المخزون" : "Low Stock Alert"}
               </p>
               <p className="text-3xl font-bold text-red-600">
-                {lowStockItems.length}
+                <AnimatedCounter value={lowStockItems.length} />
               </p>
               <p className="text-red-600 text-sm">
-                {language === "ar" ? "عناصر تحتاج إعادة ترتيب" : "Items need reordering"}
+                {language === "ar" ? "عناصر قد تنفد قريبًا" : "Items may run out soon"}
               </p>
             </div>
             <AlertTriangle className="w-12 h-12 text-red-500" />
@@ -199,7 +266,9 @@ export default function Inventory() {
               <p className="text-blue-800 font-medium">
                 {language === "ar" ? "إجمالي الأصناف" : "Total Items"}
               </p>
-              <p className="text-3xl font-bold text-blue-600">{inventoryItems.length}</p>
+              <p className="text-3xl font-bold text-blue-600">
+                <AnimatedCounter value={inventoryItems.length} />
+              </p>
               <p className="text-blue-600 text-sm">
                 {language === "ar" ? "أنواع الأقمشة في المخزون" : "Fabric types in stock"}
               </p>
@@ -220,7 +289,7 @@ export default function Inventory() {
                 {language === "ar" ? "قيمة المخزون" : "Stock Value"}
               </p>
               <p className="text-3xl font-bold text-green-600">
-                ${(totalValue / 1000).toFixed(1)}K
+                $<AnimatedCounter value={Math.round(totalValue / 1000)} suffix="K" />
               </p>
               <p className="text-green-600 text-sm">
                 {language === "ar" ? "إجمالي قيمة المخزون" : "Total inventory value"}
@@ -290,16 +359,7 @@ export default function Inventory() {
               <option value="outOfStock">{language === "ar" ? "نفذ من المخزون" : "Out of Stock"}</option>
             </select>
           </div>
-          <div
-            className={`flex items-center ${language === "ar" ? "space-x-reverse space-x-3" : "space-x-3"}`}
-          >
-            <button
-              className={`px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center ${language === "ar" ? "space-x-reverse space-x-2" : "space-x-2"}`}
-            >
-              <Filter className="w-4 h-4" />
-              <span>{t("moreFilters")}</span>
-            </button>
-          </div>
+
         </div>
       </motion.div>
 
@@ -389,6 +449,29 @@ export default function Inventory() {
                   </div>
                 </div>
 
+                {/* معلومات إضافية */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">
+                      {language === "ar" ? "الكمية الحالية:" : "Current Quantity:"}
+                    </span>
+                    <span className="font-medium text-gray-900">
+                      {item.quantity.toLocaleString()} {language === "ar" ? "متر" : "meters"}
+                    </span>
+                  </div>
+                  
+                  {getLastMovement(item.id) && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">
+                        {language === "ar" ? "آخر عملية:" : "Last Operation:"}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {getLastMovement(item.id)?.date}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Actions */}
                 <div
                   className={`flex ${language === "ar" ? "space-x-reverse space-x-2" : "space-x-2"} pt-2 border-t border-gray-100`}
@@ -396,20 +479,22 @@ export default function Inventory() {
                   <button
                     onClick={() => {
                       setSelectedItem(item);
-                      setShowReorderModal(true);
+                      setShowStockInModal(true);
                     }}
-                    className="flex-1 px-3 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium"
+                    className="flex-1 px-3 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium flex items-center justify-center"
                   >
-                    {language === "ar" ? "إعادة ترتيب" : "Reorder"}
+                    <Plus className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+                    {language === "ar" ? "إدخال كمية" : "Add Stock"}
                   </button>
                   <button
                     onClick={() => {
                       setSelectedItem(item);
-                      setShowUpdateModal(true);
+                      setShowStockOutModal(true);
                     }}
-                    className="flex-1 px-3 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                    className="flex-1 px-3 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium flex items-center justify-center"
                   >
-                    {language === "ar" ? "تحديث" : "Update"}
+                    <Minus className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+                    {language === "ar" ? "إخراج كمية" : "Remove Stock"}
                   </button>
                 </div>
               </div>
@@ -453,11 +538,12 @@ export default function Inventory() {
                   <button
                     onClick={() => {
                       setSelectedItem(item);
-                      setShowReorderModal(true);
+                      setShowStockInModal(true);
                     }}
-                    className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors"
+                    className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors flex items-center"
                   >
-                    {language === "ar" ? "إعادة ترتيب" : "Reorder"}
+                    <Plus className="w-3 h-3 mr-1 rtl:ml-1 rtl:mr-0" />
+                    {language === "ar" ? "إدخال كمية" : "Add Stock"}
                   </button>
                 </div>
               </div>
@@ -492,6 +578,29 @@ export default function Inventory() {
           fetchInventoryData(); // Refresh data after reordering
         }}
         item={selectedItem}
+      />
+
+      {/* Stock Movement Modals */}
+      <StockMovementModal
+        isOpen={showStockInModal}
+        onClose={() => {
+          setShowStockInModal(false);
+          setSelectedItem(null);
+          fetchInventoryData(); // Refresh data after stock movement
+        }}
+        item={selectedItem}
+        operation="in"
+      />
+
+      <StockMovementModal
+        isOpen={showStockOutModal}
+        onClose={() => {
+          setShowStockOutModal(false);
+          setSelectedItem(null);
+          fetchInventoryData(); // Refresh data after stock movement
+        }}
+        item={selectedItem}
+        operation="out"
       />
     </div>
   );

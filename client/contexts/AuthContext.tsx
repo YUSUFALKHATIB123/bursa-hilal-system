@@ -33,7 +33,7 @@ const USERS: { [email: string]: { password: string; user: User } } = {
       name: "Yusuf Alkhatib",
       email: "yusuf@bursahilal.com",
       role: "admin",
-      permissions: ["*"], // Full access
+      permissions: ["*", "settings"], // Full access + settings
     },
   },
   "mustafa@bursahilal.com": {
@@ -43,7 +43,7 @@ const USERS: { [email: string]: { password: string; user: User } } = {
       name: "Mustafa Alkhatib",
       email: "mustafa@bursahilal.com",
       role: "owner",
-      permissions: ["*"], // Full access
+      permissions: ["*", "settings"], // Full access + settings
     },
   },
   "mohammad@bursahilal.com": {

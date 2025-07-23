@@ -202,6 +202,29 @@ class ApiService {
     });
   }
 
+  // Stock Movements API
+  async getStockMovements() {
+    return this.request('/inventory/movements/all');
+  }
+
+  async getItemMovements(itemId: string) {
+    return this.request(`/inventory/movements/${itemId}`);
+  }
+
+  async createStockMovement(movement: any) {
+    return this.request('/inventory/movements', {
+      method: 'POST',
+      body: JSON.stringify(movement),
+    });
+  }
+
+  async processStockMovement(itemId: string, movementData: any) {
+    return this.request(`/inventory/${itemId}/movement`, {
+      method: 'POST',
+      body: JSON.stringify(movementData),
+    });
+  }
+
   // Employees API
   async getEmployees() {
     return this.request('/employees');

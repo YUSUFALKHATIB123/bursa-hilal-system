@@ -26,10 +26,12 @@ function AnimatedCounter({
   value,
   duration = 2000,
   suffix = "",
+  prefix = "",
 }: {
   value: number;
   duration?: number;
   suffix?: string;
+  prefix?: string;
 }) {
   const [count, setCount] = useState(0);
 
@@ -50,6 +52,7 @@ function AnimatedCounter({
 
   return (
     <span>
+      {prefix}
       {count.toLocaleString()}
       {suffix}
     </span>
@@ -63,6 +66,8 @@ function RoleBasedCard({
   value,
   color,
   trend,
+  prefix = "",
+  suffix = "",
 }: {
   title: string;
   description: string;
@@ -70,6 +75,8 @@ function RoleBasedCard({
   value: string | number;
   color: string;
   trend?: string;
+  prefix?: string;
+  suffix?: string;
 }) {
   return (
     <motion.div
@@ -85,7 +92,7 @@ function RoleBasedCard({
         <div className="text-right min-w-0">
           <div className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
             {typeof value === "number" ? (
-              <AnimatedCounter value={value} />
+              <AnimatedCounter value={value} prefix={prefix} suffix={suffix} />
             ) : (
               value
             )}
@@ -244,7 +251,9 @@ export default function Index() {
             description:
               language === "ar" ? "الإيرادات الشهرية" : "Monthly revenue",
             icon: DollarSign,
-            value: `$${(totalRevenue / 1000).toFixed(1)}K`,
+            value: Math.round(totalRevenue / 1000 * 10) / 10,
+            prefix: "$",
+            suffix: "K",
             color: "bg-green-500",
             trend: "+18%",
           },
@@ -257,7 +266,7 @@ export default function Index() {
             icon: AlertTriangle,
             value: lowStockItems,
             color: "bg-orange-500",
-            trend: lowStockItems > 0 ? "Alert" : "Good",
+            trend: lowStockItems > 0 ? (language === "ar" ? "تنبيه" : "Alert") : (language === "ar" ? "جيد" : "Good"),
           },
           {
             title: language === "ar" ? "التنبيهات النشطة" : "Active Alerts",
@@ -268,7 +277,7 @@ export default function Index() {
             icon: Bell,
             value: activeAlerts,
             color: "bg-red-500",
-            trend: activeAlerts > 0 ? "Action needed" : "All clear",
+            trend: activeAlerts > 0 ? (language === "ar" ? "بحاجة إجراء" : "Action needed") : (language === "ar" ? "كل شيء جيد" : "All clear"),
           },
           {
             title:
@@ -302,7 +311,9 @@ export default function Index() {
             description:
               language === "ar" ? "الإيرادات الشهرية" : "Monthly revenue",
             icon: DollarSign,
-            value: `$${(totalRevenue / 1000).toFixed(1)}K`,
+            value: Math.round(totalRevenue / 1000 * 10) / 10,
+            prefix: "$",
+            suffix: "K",
             color: "bg-green-500",
             trend: "+18%",
           },
@@ -367,7 +378,7 @@ export default function Index() {
           {
             title: language === "ar" ? "المخزون المطلوب" : "Required Stock",
             description:
-              language === "ar" ? "مواد ��ام مطلوبة" : "Raw materials needed",
+              language === "ar" ? "مواد خام مطلوبة" : "Raw materials needed",
             icon: Package,
             value: 5,
             color: "bg-orange-500",

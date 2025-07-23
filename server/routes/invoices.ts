@@ -190,11 +190,18 @@ router.delete('/:id', (req, res) => {
     try {
         let data = readData();
         if (Array.isArray(data)) {
-            const initialLength = data.length;
-            data = data.filter((i: any) => i.id !== req.params.id);
-            if (data.length < initialLength) {
-                writeData(data);
-                res.status(204).send();
+            const index = data.findIndex((i: any) => i.id === req.params.id);
+            if (index !== -1) {
+                if (data[index].isDeleted) { // إذا كانت محذوفة مسبقاً، احذفها نهائياً
+                    data.splice(index, 1);
+                    writeData(data);
+                    return res.status(200).json({ message: 'Invoice permanently deleted' });
+                } else { // soft delete
+                    data[index].isDeleted = true;
+                    data[index].deletedAt = new Date().toISOString();
+                    writeData(data);
+                    return res.status(200).json({ message: 'Invoice soft deleted' });
+                }
             } else {
                 res.status(404).json({ message: 'Item not found' });
             }

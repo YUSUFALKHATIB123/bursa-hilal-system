@@ -1,0 +1,56 @@
+[
+  {
+    "id": "MOV-001",
+    "itemId": "INV-001",
+    "type": "Jacquard",
+    "color": "Green",
+    "quantity": 500,
+    "operation": "in",
+    "user": "admin",
+    "date": "2025-01-15",
+    "notes": "إضافة مخزون جديد",
+    "previousQuantity": 4500,
+    "newQuantity": 5000
+  },
+  {
+    "id": "MOV-002",
+    "itemId": "INV-002",
+    "type": "Velvet",
+    "color": "Red",
+    "quantity": 200,
+    "operation": "out",
+    "user": "admin",
+    "date": "2025-01-16",
+    "notes": "استخدام في الإنتاج",
+    "previousQuantity": 2500,
+    "newQuantity": 2300
+  },
+  {
+    "id": "MOV-1753184644216",
+    "itemId": "INV-001",
+    "type": "Jacquard",
+    "color": "Green",
+    "quantity": 200,
+    "operation": "out",
+    "user": "admin",
+    "date": "2025-07-22",
+    "notes": "جمال",
+    "previousQuantity": 5000,
+    "newQuantity": 4800,
+    "createdAt": "2025-07-22T11:44:04.216Z"
+  },
+  {
+    "id": "MOV-1753187423272",
+    "itemId": "INV-002",
+    "type": "Velvet",
+    "color": "Red",
+    "quantity": 100,
+    "operation": "in",
+    "user": "admin",
+    "date": "2025-07-22",
+    "notes": "",
+    "previousQuantity": 2300,
+    "newQuantity": 2400,
+    "createdAt": "2025-07-22T12:30:23.272Z"
+  }
+]

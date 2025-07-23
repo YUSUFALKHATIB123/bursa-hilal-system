@@ -14,12 +14,15 @@ import TrackOrderDetails from "./pages/TrackOrderDetails";
 import Customers from "./pages/Customers";
 import Invoices from "./pages/Invoices";
 import Inventory from "./pages/Inventory";
+import StockMovements from "./pages/StockMovements";
 import Employees from "./pages/Employees";
 import Notifications from "./pages/Notifications";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Suppliers from "./pages/Suppliers";
 import Settings from "./pages/Settings";
 import MobileTest from "./pages/MobileTest";
+import SupplierDetails from "./pages/SupplierDetails";
+import Trash from "./pages/Trash";
 
 export default function App() {
   return (
@@ -121,6 +124,22 @@ function AppContent() {
                           }
                         />
                         <Route
+                          path="/stock-movements"
+                          element={
+                            <ProtectedRoute permission="stock-movements">
+                              <StockMovements />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/inventory-movements"
+                          element={
+                            <ProtectedRoute permission="*">
+                              <StockMovements />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
                           path="/employees"
                           element={
                             <ProtectedRoute permission="employees">
@@ -153,10 +172,26 @@ function AppContent() {
                           }
                         />
                         <Route
+                          path="/suppliers/:id"
+                          element={
+                            <ProtectedRoute permission="suppliers">
+                              <SupplierDetails />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
                           path="/settings"
                           element={
-                            <ProtectedRoute permission="admin">
+                            <ProtectedRoute permission="settings">
                               <Settings />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/trash"
+                          element={
+                            <ProtectedRoute permission="*">
+                              <Trash />
                             </ProtectedRoute>
                           }
                         />

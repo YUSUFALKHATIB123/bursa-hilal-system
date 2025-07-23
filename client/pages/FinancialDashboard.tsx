@@ -27,6 +27,10 @@ import {
   Clock,
   Filter,
   ChevronDown,
+  Percent,
+  Wallet,
+  Smile,
+  Frown,
 } from "lucide-react";
 import { Doughnut } from 'react-chartjs-2';
 import {
@@ -35,9 +39,51 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
+import ReactCountryFlag from "react-country-flag";
+// أضف CSS للنبض
+import "../global.css";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+// Animated Counter Component
+function AnimatedCounter({
+  value,
+  duration = 2000,
+  suffix = "",
+  prefix = "",
+}: {
+  value: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value, duration]);
+
+  return (
+    <span>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 // Time filter options
 const timeFilters = [
@@ -55,10 +101,12 @@ const useFinancialData = (timeFilter: string) => {
   useEffect(() => {
     const fetchFinancialData = async () => {
       try {
-        // Fetch real data from API
-        const [invoices, employees] = await Promise.all([
+        // Fetch real data from API - جميع البيانات من جميع الصفحات
+        const [invoices, employees, inventory, orders] = await Promise.all([
           apiService.getInvoices(),
           apiService.getEmployees(),
+          apiService.getInventory(),
+          apiService.getOrders(),
         ]);
 
         // Calculate real financial metrics
@@ -103,16 +151,25 @@ const useFinancialData = (timeFilter: string) => {
             return sum + (typeof amount === 'number' ? amount : 0);
           }, 0);
 
-        // Calculate expenses (salaries + other costs) with null checking
+        // Calculate expenses from multiple sources
+        // 1. Employee salaries
         const salaryExpenses = employees
           .reduce((sum, emp) => {
             const salary = emp.paid || emp.salary || 0;
             return sum + (typeof salary === 'number' ? salary : 0);
           }, 0);
         
-        // Calculate other real expenses from system data
-        const otherExpenses = 15000; // This should be calculated from actual expense records
-        const totalExpenses = salaryExpenses + otherExpenses;
+        // 2. Inventory costs (30% of inventory value as raw materials)
+        const inventoryCosts = inventory
+          .reduce((sum, item) => {
+            const value = (item.quantity || 0) * (item.price || 0) * 0.3;
+            return sum + (typeof value === 'number' ? value : 0);
+          }, 0);
+        
+        // 3. Other operational expenses (utilities, maintenance, etc.)
+        const operationalExpenses = 15000; // Base operational costs
+        
+        const totalExpenses = salaryExpenses + inventoryCosts + operationalExpenses;
 
         const netProfit = currentRevenue - totalExpenses;
         const profitMargin = currentRevenue > 0 ? (netProfit / currentRevenue) * 100 : 0;
@@ -131,6 +188,12 @@ const useFinancialData = (timeFilter: string) => {
           revenueChange,
           invoices: invoices.filter(inv => new Date(inv.date) >= startDate),
           employees,
+          inventory,
+          orders,
+          // Detailed expense breakdown
+          salaryExpenses,
+          inventoryCosts,
+          operationalExpenses,
         });
       } catch (error) {
         console.error("Error fetching financial data:", error);
@@ -144,6 +207,11 @@ const useFinancialData = (timeFilter: string) => {
           revenueChange: 0,
           invoices: [],
           employees: [],
+          inventory: [],
+          orders: [],
+          salaryExpenses: 0,
+          inventoryCosts: 0,
+          operationalExpenses: 0,
         });
       } finally {
         setLoading(false);
@@ -288,44 +356,56 @@ function InteractiveDonutChart({ data, language }: { data: any[], language: stri
 const monthlyData = realFinancialData.monthlyData;
 
 // Generate real monthly data from actual invoices and employees
-const generateRealMonthlyData = (invoices: any[], employees: any[]) => {
-  const monthlyRevenue = {};
-  const monthlyExpenses = {};
-  
-  // Calculate monthly revenue from invoices
+const generateRealMonthlyData = (invoices: any[], employees: any[], inventory: any[]) => {
+  const monthlyRevenue: Record<string, number> = {};
+
   invoices.forEach(invoice => {
+    // فقط فواتير المبيعات وبقيمة رقمية صحيحة
+    if (invoice.type !== 'sales') return;
+    if (!invoice.date) return;
+    const amount = Number(invoice.amountReceived || invoice.total || invoice.amount || 0);
+    if (isNaN(amount) || amount <= 0) return;
     const date = new Date(invoice.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const amount = invoice.amountReceived || invoice.amount || invoice.total || 0;
     monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + amount;
   });
-  
-  // Calculate monthly expenses (simplified - in reality this would come from expense records)
-  const avgMonthlyExpenses = employees.reduce((sum, emp) => {
-    const salary = emp.paid || emp.salary || 0;
-    return sum + salary;
-  }, 0) + 15000; // Base expenses
-  
-  // Generate last 6 months of data
-  const months = [];
+
+  const months: { month: string, revenue: number, expenses: number, profit: number, hasRealData: boolean }[] = [];
+  const now = new Date();
   for (let i = 5; i >= 0; i--) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleDateString('en', { month: 'short' });
-    
     const revenue = monthlyRevenue[monthKey] || 0;
-    const expenses = avgMonthlyExpenses;
+
+    // مصروفات هذا الشهر (ثابتة أو يمكن تعديلها حسب بياناتك)
+    let salaryExpenses = 0;
+    let inventoryCosts = 0;
+    if (employees.length > 0) {
+      salaryExpenses = employees.reduce((sum, emp) => {
+        const salary = emp.paid || emp.salary || 0;
+        return sum + salary;
+      }, 0);
+    }
+    if (inventory.length > 0) {
+      inventoryCosts = inventory.reduce((sum, item) => {
+        const value = (item.quantity || 0) * (item.price || 0) * 0.3;
+        return sum + value;
+      }, 0);
+    }
+    const baseExpenses = 15000;
+    const avgMonthlyExpenses = salaryExpenses + inventoryCosts + baseExpenses;
+    // المصروفات تظهر إذا كان هناك إيرادات أو إذا كان هناك موظفين أو مخزون (أي بيانات حقيقية)
+    const expenses = (revenue > 0 || salaryExpenses > 0 || inventoryCosts > 0) ? avgMonthlyExpenses : 0;
     const profit = revenue - expenses;
-    
     months.push({
       month: monthName,
       revenue,
       expenses,
-      profit
+      profit,
+      hasRealData: revenue > 0
     });
   }
-  
   return months;
 };
 
@@ -338,12 +418,16 @@ function MetricCard({
   change,
   icon: Icon,
   color,
+  prefix = "",
+  suffix = "",
 }: {
   title: string;
-  value: string;
+  value: string | number;
   change: string;
   icon: any;
   color: string;
+  prefix?: string;
+  suffix?: string;
 }) {
   const { language } = useLanguage();
   const isPositive = change.startsWith("+");
@@ -358,7 +442,13 @@ function MetricCard({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-600 text-sm mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          <p className="text-3xl font-bold text-gray-900">
+            {typeof value === "number" ? (
+              <AnimatedCounter value={value} prefix={prefix} suffix={suffix} />
+            ) : (
+              value
+            )}
+          </p>
           <div className="flex items-center mt-2">
             {isPositive ? (
               <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
@@ -369,9 +459,6 @@ function MetricCard({
               className={`text-sm font-medium ${isPositive ? "text-green-500" : "text-red-500"}`}
             >
               {change}
-            </span>
-            <span className="text-gray-500 text-sm ml-1">
-              {language === "ar" ? "مقارنة بالشهر الماضي" : "vs last month"}
             </span>
           </div>
         </div>
@@ -385,8 +472,21 @@ function MetricCard({
 
 function SimpleBarChart({ data }: { data?: any[] }) {
   const { language, t } = useLanguage();
-  const chartData = data || monthlyData;
-  const maxValue = Math.max(...chartData.map((d) => d.revenue));
+  const chartData = data || [];
+  
+  // Check if we have any real data
+  const hasRealData = chartData.some(d => d.hasRealData);
+  const totalRevenue = chartData.reduce((sum, d) => sum + (d.revenue || 0), 0);
+  
+  // Calculate max value for proper scaling - use both revenue and expenses
+  const maxValue = Math.max(
+    ...chartData.map((d) => Math.max(d.revenue || 0, d.expenses || 0)),
+    1 // Ensure we don't divide by zero
+  );
+
+  // 2. في رسم الأشهر، ابدأ من أول شهر فيه بيانات فعلية (revenue > 0)
+  const firstRealMonthIndex = chartData.findIndex(d => d.revenue > 0);
+  const filteredMonthlyData = firstRealMonthIndex === -1 ? chartData : chartData.slice(firstRealMonthIndex);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -400,8 +500,26 @@ function SimpleBarChart({ data }: { data?: any[] }) {
         </button>
       </div>
 
+      {/* Show message if no real data */}
+      {!hasRealData && (
+        <div className="text-center py-8">
+          <div className="text-gray-400 mb-2">
+            <BarChart3 className="w-12 h-12 mx-auto" />
+          </div>
+          <p className="text-gray-600 font-medium">
+            {language === "ar" ? "لا توجد بيانات إيرادات شهرية حتى الآن" : "No monthly revenue data available yet"}
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            {language === "ar" 
+              ? "ستظهر البيانات هنا عند إضافة فواتير جديدة" 
+              : "Data will appear here when new invoices are added"
+            }
+          </p>
+        </div>
+      )}
+
       <div className="space-y-4">
-        {chartData.map((item, index) => (
+        {filteredMonthlyData.map((item, index) => (
           <motion.div
             key={item.month}
             initial={{ opacity: 0, x: -20 }}
@@ -417,27 +535,24 @@ function SimpleBarChart({ data }: { data?: any[] }) {
                 <div className="flex-1 bg-gray-200 rounded-full h-2">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${(item.revenue / maxValue) * 100}%` }}
+                    animate={{ width: `${((item.revenue || 0) / maxValue) * 100}%` }}
                     transition={{ delay: index * 0.1 + 0.3, duration: 0.8 }}
-                    className="bg-green-500 h-2 rounded-full"
+                    className={`h-2 rounded-full ${item.hasRealData ? 'bg-green-500' : 'bg-gray-300'}`}
                   />
                 </div>
-                <span className="text-sm font-medium text-green-600 w-16">
-                  ${(item.revenue / 1000).toFixed(0)}K
-                </span>
+                <span className="text-sm font-medium w-16 text-green-600">${formatShortNumber(item.revenue || 0)}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="flex-1 bg-gray-200 rounded-full h-2">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${(item.expenses / maxValue) * 100}%` }}
+                    animate={{ width: `${((item.expenses || 0) / maxValue) * 100}%` }}
                     transition={{ delay: index * 0.1 + 0.5, duration: 0.8 }}
                     className="bg-red-400 h-2 rounded-full"
+                    style={{ minWidth: '16px' }}
                   />
                 </div>
-                <span className="text-sm font-medium text-red-600 w-16">
-                  ${(item.expenses / 1000).toFixed(0)}K
-                </span>
+                <span className="text-sm font-medium text-red-600 w-16">${formatShortNumber(item.expenses || 0)}</span>
               </div>
             </div>
           </motion.div>
@@ -462,7 +577,156 @@ function SimpleBarChart({ data }: { data?: any[] }) {
   );
 }
 
+function MapCard() {
+  // استخدم المسار المحلي للملف TopoJSON
+  const geoUrl = "/custom.geo.json";
 
+  // بيانات وهمية: استخدم الأكواد الرقمية geo.id
+  const dummyData = [
+    { code: 760, name: "سوريا", revenue: 70000, clients: ["عميل دمشق", "عميل حلب"] },
+    { code: 792, name: "تركيا", revenue: 120000, clients: ["عميل اسطنبول", "عميل بورصة", "عميل أنقرة", "عميل إزمير"] },
+    { code: 434, name: "ليبيا", revenue: 45000, clients: ["عميل طرابلس"] },
+  ];
+
+  // دالة البحث تعتمد فقط على geo.id
+  const getCountryData = (geo) => {
+    return dummyData.find((c) => c.code === geo.id);
+  };
+
+  // ألوان حسب الإيراد
+  const getColor = (revenue) => {
+    if (revenue > 100000) return "#059669"; // أخضر غامق
+    if (revenue > 60000) return "#34d399"; // أخضر متوسط
+    if (revenue > 0) return "#fef9c3"; // أصفر فاتح
+    return "#f3f4f6"; // رمادي
+  };
+
+  // Tooltip state
+  const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: "" });
+
+  // دالة لحساب مركز الدولة (centroid)
+  const getCentroid = (geo) => {
+    // إذا كان geo.geometry موجود
+    if (geo && geo.geometry) {
+      // استخدم مكتبة d3-geo لحساب centroid
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const d3 = require("d3-geo");
+        return d3.geoCentroid(geo);
+      } catch {
+        // fallback: مركز مستطيل الباوندرز
+        if (geo.properties && geo.properties.LABEL_X && geo.properties.LABEL_Y) {
+          return [geo.properties.LABEL_X, geo.properties.LABEL_Y];
+        }
+      }
+    }
+    return null;
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow p-6 mb-8" style={{ width: '100vw', maxWidth: '1200px', margin: '24px auto', overflow: 'visible' }}>
+      <h2 className="text-lg font-bold mb-4">الخريطة الجغرافية (سوريا، ليبيا، تركيا)</h2>
+      <div style={{ width: '100%', maxWidth: '1200px', height: 400, margin: '0 auto', position: 'relative' }}>
+        <ComposableMap
+          projection="geoMercator"
+          projectionConfig={{
+            scale: 600,
+            center: [35, 30],
+          }}
+          width={1200}
+          height={400}
+          style={{ width: "100%", height: "auto" }}
+        >
+          <Geographies geography={geoUrl} object="countries">
+            {({ geographies, projection }) =>
+              geographies.map((geo) => {
+                const country = getCountryData(geo);
+                const revenue = country ? country.revenue : 0;
+                const centroid = country ? getCentroid(geo) : null;
+                const projected = centroid ? projection(centroid) : null;
+                if (country && centroid && projected) {
+                  console.log('id:', geo.id, 'centroid:', centroid, 'projected:', projected);
+                }
+                return (
+                  <g key={geo.rsmKey}>
+                    <Geography
+                      geography={geo}
+                      onMouseEnter={(e) => {
+                        if (!country) return;
+                        const { clientX: x, clientY: y } = e;
+                        setTooltip({
+                          visible: true,
+                          x,
+                          y,
+                          content: `
+                            <div style='text-align:right;'>
+                              <b>${country.name}</b><br/>
+                              العملاء: ${country.clients.length > 3 ? country.clients.length + " عملاء" : country.clients.join(", ")}<br/>
+                              الإيراد: ${country.revenue.toLocaleString()} ج.م
+                            </div>
+                          `,
+                        });
+                      }}
+                      onMouseLeave={() => setTooltip({ ...tooltip, visible: false })}
+                      style={{
+                        default: { fill: getColor(revenue), outline: "none" },
+                        hover: { fill: "#2563eb", outline: "none" },
+                        pressed: { fill: "#10b981", outline: "none" },
+                      }}
+                    />
+                    {/* دائرة حمراء ثابتة على centroid */}
+                    {country && centroid && projected && (
+                      <circle
+                        cx={projected[0]}
+                        cy={projected[1]}
+                        r={14}
+                        fill="red"
+                        opacity={0.7}
+                      />
+                    )}
+                  </g>
+                );
+              })
+            }
+          </Geographies>
+        </ComposableMap>
+        {/* Tooltip */}
+        {tooltip.visible && (
+          <div
+            style={{
+              position: "fixed",
+              top: tooltip.y + 10,
+              left: tooltip.x + 10,
+              background: "rgba(0,0,0,0.85)",
+              color: "#fff",
+              padding: "10px 16px",
+              borderRadius: 8,
+              fontSize: 14,
+              pointerEvents: "none",
+              zIndex: 1000,
+              direction: "rtl",
+              minWidth: 120,
+              maxWidth: 220,
+            }}
+            dangerouslySetInnerHTML={{ __html: tooltip.content }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 3. دالة اختصار الأرقام الكبيرة
+function formatShortNumber(num: number) {
+  if (num >= 1e3) {
+    const rounded = Math.round(num / 1e3); // أقرب رقم صحيح بالآلاف
+    let str = rounded.toString();
+    // إذا كان الرقم 3 خانات وكان الثالث صفر، احذف الصفر
+    if (str.length === 3 && str[2] === '0') str = str.slice(0, 2);
+    return str + 'K';
+  }
+  return num.toString();
+}
 
 export default function FinancialDashboard() {
   const { language } = useLanguage();
@@ -531,23 +795,17 @@ export default function FinancialDashboard() {
 
   const t = (key: string) => translations[language]?.[key] || key;
 
-  // Calculate expense breakdown with real data
-  const salaryExpenses = financialData.employees.reduce((sum, emp) => sum + (emp.paid || emp.salary || 0), 0);
-  const materialExpenses = 8000; // Could be calculated from inventory data
-  const utilityExpenses = 2500;
-  const maintenanceExpenses = 1800;
-  const otherExpenses = Math.max(0, financialData.totalExpenses - salaryExpenses - materialExpenses - utilityExpenses - maintenanceExpenses);
-
+  // Calculate expense breakdown with real data from multiple sources
   const expenseBreakdownData = [
-    { name: t("salaries"), value: salaryExpenses, color: "#3B82F6" },
-    { name: t("materials"), value: materialExpenses, color: "#EF4444" },
-    { name: t("utilities"), value: utilityExpenses, color: "#10B981" },
-    { name: t("maintenance"), value: maintenanceExpenses, color: "#F59E0B" },
-    { name: t("other"), value: otherExpenses, color: "#8B5CF6" },
+    { name: t("salaries"), value: financialData.salaryExpenses, color: "#3B82F6" },
+    { name: t("materials"), value: financialData.inventoryCosts, color: "#EF4444" },
+    { name: t("utilities"), value: financialData.operationalExpenses * 0.4, color: "#10B981" },
+    { name: t("maintenance"), value: financialData.operationalExpenses * 0.3, color: "#F59E0B" },
+    { name: t("other"), value: financialData.operationalExpenses * 0.3, color: "#8B5CF6" },
   ];
 
   // Generate real monthly data for charts
-  const realMonthlyData = generateRealMonthlyData(financialData.invoices, financialData.employees);
+  const realMonthlyData = generateRealMonthlyData(financialData.invoices, financialData.employees, financialData.inventory);
 
   // Export function
   const exportReport = () => {
@@ -649,33 +907,61 @@ export default function FinancialDashboard() {
       <div className="responsive-grid container-safe">
         <MetricCard
           title={t("revenue")}
-          value={`$${financialData.currentRevenue.toLocaleString()}`}
+          value={formatShortNumber(financialData.currentRevenue)}
+          prefix="$"
           change={`${financialData.revenueChange >= 0 ? '+' : ''}${financialData.revenueChange.toFixed(1)}%`}
           icon={DollarSign}
           color="bg-green-600"
         />
         <MetricCard
           title={t("expenses")}
-          value={`$${financialData.totalExpenses.toLocaleString()}`}
+          value={formatShortNumber(financialData.totalExpenses)}
+          prefix="$"
           change="-5.2%"
-          icon={TrendingDown}
-          color="bg-blue-500"
+          icon={ArrowDownRight}
+          color="bg-red-500"
         />
         <MetricCard
           title={t("profit")}
-          value={`$${financialData.netProfit.toLocaleString()}`}
-          change={financialData.netProfit > 0 ? "+18.7%" : "-5.2%"}
-          icon={financialData.netProfit > 0 ? TrendingUp : TrendingDown}
+          value={financialData.netProfit}
+          prefix="$"
+          change={financialData.netProfit > 0 ? `+${((financialData.netProfit / (financialData.currentRevenue || 1)) * 100).toFixed(1)}%` : `${((financialData.netProfit / (financialData.currentRevenue || 1)) * 100).toFixed(1)}%`}
+          icon={financialData.netProfit > 0 ? Smile : Frown}
           color={financialData.netProfit > 0 ? "bg-green-600" : "bg-red-600"}
         />
         <MetricCard
           title={t("profitMargin")}
-          value={`${financialData.profitMargin.toFixed(1)}%`}
+          value={financialData.profitMargin.toFixed(1)}
+          suffix="%"
           change={financialData.profitMargin > 20 ? "+2.1%" : "-1.8%"}
-          icon={PieChart}
+          icon={BarChart3}
           color={financialData.profitMargin > 20 ? "bg-green-500" : "bg-orange-500"}
         />
       </div>
+
+      {/* Data Status Alert */}
+      {financialData.invoices.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
+        >
+          <div className="flex items-center">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 mr-3" />
+            <div>
+              <h4 className="text-sm font-medium text-yellow-800">
+                {language === "ar" ? "لا توجد فواتير في النظام" : "No invoices in the system"}
+              </h4>
+              <p className="text-sm text-yellow-700 mt-1">
+                {language === "ar" 
+                  ? "الإيرادات والمصروفات ستظهر عند إضافة فواتير وموظفين ومخزون"
+                  : "Revenue and expenses will appear when invoices, employees, and inventory are added"
+                }
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 container-safe">
@@ -719,6 +1005,11 @@ export default function FinancialDashboard() {
                           {language === "ar" ? `${financialData.employees.length} موظفين` : `${financialData.employees.length} employees`}
                         </p>
                       )}
+                      {item.name === t("materials") && (
+                        <p className="text-xs text-gray-500">
+                          {language === "ar" ? `${financialData.inventory.length} منتج` : `${financialData.inventory.length} items`}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -744,7 +1035,7 @@ export default function FinancialDashboard() {
                   {language === "ar" ? "فواتير مدفوعة" : "Paid Invoices"}
                 </p>
                 <p className="text-xl font-bold text-green-600">
-                  {realFinancialData.paidInvoices}
+                  {financialData.invoices.filter(inv => inv.paymentStatus === "paid").length}
                 </p>
               </div>
             </motion.div>
@@ -763,7 +1054,7 @@ export default function FinancialDashboard() {
                   {language === "ar" ? "فواتير غير مدفوعة" : "Unpaid Invoices"}
                 </p>
                 <p className="text-xl font-bold text-red-600">
-                  {realFinancialData.unpaidInvoices}
+                  {financialData.invoices.filter(inv => inv.paymentStatus === "unpaid").length}
                 </p>
               </div>
             </motion.div>
@@ -782,7 +1073,7 @@ export default function FinancialDashboard() {
                   {language === "ar" ? "مدفوعات معلقة" : "Outstanding"}
                 </p>
                 <p className="text-lg font-bold text-orange-600">
-                  ${(realFinancialData.outstandingPayments / 1000).toFixed(0)}K
+                  ${formatShortNumber(financialData.invoices.reduce((sum, inv) => sum + (inv.amountRemaining || 0), 0) / 1000)}K
                 </p>
               </div>
             </motion.div>
@@ -801,10 +1092,10 @@ export default function FinancialDashboard() {
                   {language === "ar" ? "فواتير متأخرة" : "Overdue"}
                 </p>
                 <p className="text-lg font-bold text-red-600">
-                  ${(realFinancialData.overdueAmount / 1000).toFixed(0)}K
+                  ${formatShortNumber(financialData.invoices.filter(inv => inv.isOverdue).reduce((sum, inv) => sum + (inv.amountRemaining || 0), 0) / 1000)}K
                 </p>
                 <p className="text-xs text-gray-500">
-                  {realFinancialData.overdueCount} {language === "ar" ? "فاتورة" : "invoices"}
+                  {financialData.invoices.filter(inv => inv.isOverdue).length} {language === "ar" ? "فاتورة" : "invoices"}
                 </p>
               </div>
             </motion.div>
@@ -812,102 +1103,13 @@ export default function FinancialDashboard() {
         </div>
       </div>
 
-      {/* Financial Summary Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg border border-gray-200 overflow-hidden"
-      >
-        <div className="px-6 py-3 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            {language === "ar"
-              ? "الملخص المالي الشهري"
-              : "Monthly Financial Summary"}
-          </h3>
-        </div>
-        <div className="table-responsive">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  {language === "ar" ? "الشهر" : "Month"}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  {language === "ar" ? "الإيرادات" : "Revenue"}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  {language === "ar" ? "المصروفات" : "Expenses"}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  {language === "ar" ? "الربح" : "Profit"}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  {language === "ar" ? "النمو" : "Growth"}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {monthlyData.map((data, index) => {
-                const growth =
-                  index > 0
-                    ? (
-                        ((data.profit - monthlyData[index - 1].profit) /
-                          monthlyData[index - 1].profit) *
-                        100
-                      ).toFixed(1)
-                    : "0.0";
-                const isPositiveGrowth = parseFloat(growth) >= 0;
-
-                return (
-                  <motion.tr
-                    key={data.month}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="hover:bg-gray-50"
-                  >
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      {data.month}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      ${data.revenue.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      ${data.expenses.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-green-600">
-                      ${data.profit.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`flex items-center ${
-                          isPositiveGrowth ? "text-green-600" : "text-red-600"
-                        }`}
-                      >
-                        {isPositiveGrowth ? (
-                          <ArrowUpRight className="w-4 h-4 mr-1" />
-                        ) : (
-                          <ArrowDownRight className="w-4 h-4 mr-1" />
-                        )}
-                        {Math.abs(parseFloat(growth))}%
-                      </span>
-                    </td>
-                  </motion.tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </motion.div>
-
-      {/* Data Consistency Verification - Removed as requested */}
-
       {/* Financial Alerts and Insights */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
       >
+        <MapCard />
       </motion.div>
     </motion.div>
   );

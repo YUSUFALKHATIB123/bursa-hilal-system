@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../contexts/LanguageContext";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
 import apiService from "../services/api";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import {
   FileText,
   Plus,
@@ -10,7 +12,7 @@ import {
   Download,
   Search,
   Eye,
-  Share2,
+  Edit,
   Trash2,
   Calendar,
   CheckCircle,
@@ -20,6 +22,44 @@ import {
   X,
   DollarSign,
 } from "lucide-react";
+
+// Animated Counter Component
+function AnimatedCounter({
+  value,
+  duration = 2000,
+  suffix = "",
+  prefix = "",
+}: {
+  value: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value, duration]);
+
+  return (
+    <span>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 interface Invoice {
   id: string;
@@ -41,6 +81,15 @@ interface Invoice {
     unitPrice: number;
     total: number;
   }>;
+  attachedFile?: {
+    id: string;
+    originalName: string;
+    filename: string;
+    path: string;
+    size: number;
+    mimetype: string;
+    uploadDate: string;
+  };
 }
 
 // مكون عرض حالة الدفع
@@ -101,6 +150,7 @@ function CreateInvoiceModal({
     dueDate: "",
     description: "",
     type: "sales",
+    paymentStatus: "unpaid",
   });
 
   // جلب العملاء والطلبات
@@ -170,7 +220,10 @@ function CreateInvoiceModal({
 
     setLoading(true);
     try {
+      const allInvoices = await apiService.getInvoices();
+      const nextInvoiceNumber = getNextInvoiceNumber(allInvoices || []);
       const invoiceData = {
+        invoiceNumber: nextInvoiceNumber,
         customer: formData.customer,
         customerId: formData.customerId,
         orderId: formData.orderId,
@@ -179,7 +232,7 @@ function CreateInvoiceModal({
         dueDate: formData.dueDate,
         description: formData.description,
         type: formData.type,
-        paymentStatus: "unpaid",
+        paymentStatus: formData.paymentStatus,
         date: new Date().toISOString().split('T')[0],
       };
 
@@ -195,6 +248,7 @@ function CreateInvoiceModal({
         dueDate: "",
         description: "",
         type: "sales",
+        paymentStatus: "unpaid",
       });
     } catch (error) {
       console.error("Error creating invoice:", error);
@@ -262,26 +316,21 @@ function CreateInvoiceModal({
             </select>
           </div>
 
-          {/* الطلب (اختياري) */}
-          {filteredOrders.length > 0 && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {language === "ar" ? "الطلب (اختياري)" : "Order (Optional)"}
-              </label>
-              <select
-                value={formData.orderId}
-                onChange={(e) => handleOrderChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                <option value="">{language === "ar" ? "اختر الطلب" : "Select Order"}</option>
-                {filteredOrders.map((order) => (
-                  <option key={order.id} value={order.id}>
-                    {order.id} - ${order.totalAmount}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          {/* حالة الدفع */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {language === "ar" ? "حالة الدفع" : "Payment Status"}
+            </label>
+            <select
+              value={formData.paymentStatus}
+              onChange={e => setFormData(prev => ({ ...prev, paymentStatus: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value="paid">{language === "ar" ? "مدفوع" : "Paid"}</option>
+              <option value="partial">{language === "ar" ? "مدفوع جزئياً" : "Partially Paid"}</option>
+              <option value="unpaid">{language === "ar" ? "غير مدفوع" : "Unpaid"}</option>
+            </select>
+          </div>
 
           {/* المبلغ */}
           <div>
@@ -375,13 +424,31 @@ function UploadInvoiceModal({
     amount: "",
     description: "",
   });
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
       if (allowedTypes.includes(selectedFile.type)) {
         setFile(selectedFile);
+        setParseError(null);
+        setParsing(true);
+        // محاولة قراءة البيانات تلقائياً من الملف
+        try {
+          // مثال: استدعاء apiService.parseInvoiceFile (يجب أن تكون موجودة في backend)
+          const parsed = await apiService.parseInvoiceFile(selectedFile);
+          setFormData({
+            customer: parsed.customer || "",
+            amount: parsed.amount || "",
+            description: parsed.description || "",
+          });
+        } catch (err) {
+          setParseError(language === "ar" ? "فشل في قراءة بيانات الفاتورة تلقائياً. يمكنك تعبئة الحقول يدوياً." : "Failed to auto-parse invoice data. You can fill the fields manually.");
+        } finally {
+          setParsing(false);
+        }
       } else {
         showErrorToast(language === "ar" ? "نوع الملف غير مدعوم. يرجى اختيار PDF أو صورة" : "Unsupported file type. Please select PDF or image");
       }
@@ -524,6 +591,13 @@ function UploadInvoiceModal({
               placeholder={language === "ar" ? "أدخل وصف الفاتورة" : "Enter invoice description"}
             />
           </div>
+
+          {parsing && (
+            <div className="text-blue-600 text-sm mb-2">{language === "ar" ? "جاري قراءة بيانات الفاتورة..." : "Parsing invoice data..."}</div>
+          )}
+          {parseError && (
+            <div className="text-red-600 text-sm mb-2">{parseError}</div>
+          )}
 
           {/* شريط التقدم */}
           {uploading && (
@@ -694,6 +768,30 @@ function InvoiceDetailModal({
               </div>
             </div>
           )}
+          {invoice.attachedFile && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-500 mb-2">
+                {language === "ar" ? "الملف المرفق" : "Attached File"}
+              </label>
+              <a
+                href={`/server/uploads/invoices/${invoice.attachedFile.filename}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline flex items-center space-x-2 rtl:space-x-reverse"
+              >
+                <FileText className="w-5 h-5 mr-1 inline" />
+                {invoice.attachedFile.originalName}
+              </a>
+              {/* إذا كان الملف صورة، اعرضها */}
+              {(invoice.attachedFile.mimetype.startsWith('image/')) && (
+                <img
+                  src={`/server/uploads/invoices/${invoice.attachedFile.filename}`}
+                  alt="فاتورة مرفقة"
+                  className="mt-2 max-w-xs border rounded shadow"
+                />
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end pt-6">
@@ -783,6 +881,9 @@ export default function Invoices() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  // 1. أضف حالة مودال التعديل وحالة الفاتورة المحددة للتعديل
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [invoiceToEdit, setInvoiceToEdit] = useState<Invoice | null>(null);
 
   useEffect(() => {
     fetchInvoices();
@@ -792,7 +893,7 @@ export default function Invoices() {
     try {
       setLoading(true);
       const invoicesData = await apiService.getInvoices();
-      setInvoices(invoicesData || []);
+      setInvoices((invoicesData || []).filter((inv: any) => !inv.isDeleted)); // تجاهل المحذوفة
     } catch (error) {
       console.error("خطأ في جلب الفواتير:", error);
       showErrorToast(language === "ar" ? "خطأ في جلب بيانات الفواتير" : "Error fetching invoices");
@@ -865,51 +966,197 @@ export default function Invoices() {
     setShowDetailModal(true);
   };
 
-  const handleShareInvoice = (invoice: Invoice) => {
-    // إنشاء رابط مشاركة الفاتورة
-    const invoiceUrl = `${window.location.origin}/invoices/${invoice.id}`;
-    
-    // نسخ الرابط إلى الحافظة
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(invoiceUrl).then(() => {
-        showSuccessToast(
-          language === "ar" 
-            ? "تم نسخ رابط الفاتورة إلى الحافظة" 
-            : "Invoice link copied to clipboard"
-        );
-      }).catch(() => {
-        // إذا فشل النسخ التلقائي، استخدم طريقة بديلة
-        fallbackCopyToClipboard(invoiceUrl);
+  // 2. فعّل زر التعديل في جدول الفواتير
+  const handleEditInvoice = (invoice: Invoice) => {
+    setInvoiceToEdit(invoice);
+    setShowEditModal(true);
+  };
+
+
+
+  const handleExportPDF = async (invoice: Invoice) => {
+    try {
+      // إنشاء عنصر HTML مؤقت للفاتورة
+      const invoiceElement = document.createElement('div');
+      invoiceElement.style.position = 'absolute';
+      invoiceElement.style.left = '-9999px';
+      invoiceElement.style.top = '0';
+      invoiceElement.style.width = '800px';
+      invoiceElement.style.padding = '40px';
+      invoiceElement.style.backgroundColor = 'white';
+      invoiceElement.style.fontFamily = 'Arial, sans-serif';
+      invoiceElement.style.direction = language === 'ar' ? 'rtl' : 'ltr';
+      invoiceElement.style.textAlign = language === 'ar' ? 'right' : 'left';
+      
+      // إضافة شعار الشركة كخلفية شفافة
+      invoiceElement.innerHTML = `
+        <div style="position: relative; min-height: 100vh;">
+          <!-- شعار الشركة كخلفية شفافة -->
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            background-image: url('/logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.1;
+            z-index: 1;
+          "></div>
+          
+          <!-- محتوى الفاتورة -->
+          <div style="position: relative; z-index: 2;">
+            <!-- رأس الفاتورة -->
+            <div style="text-align: center; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+              <h1 style="color: #2563eb; font-size: 32px; margin: 0;">${language === 'ar' ? 'شركة برصة هلال' : 'Bursa Hilal Company'}</h1>
+              <h2 style="color: #333; font-size: 24px; margin: 10px 0;">${language === 'ar' ? 'فاتورة' : 'INVOICE'}</h2>
+            </div>
+            
+            <!-- معلومات الفاتورة -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+              <div>
+                <h3 style="color: #333; margin-bottom: 15px;">${language === 'ar' ? 'معلومات الفاتورة:' : 'Invoice Information:'}</h3>
+                <p><strong>${language === 'ar' ? 'رقم الفاتورة:' : 'Invoice Number:'}</strong> ${invoice.invoiceNumber || invoice.id}</p>
+                <p><strong>${language === 'ar' ? 'التاريخ:' : 'Date:'}</strong> ${invoice.date}</p>
+                <p><strong>${language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'}</strong> ${invoice.dueDate || (language === 'ar' ? 'غير محدد' : 'Not specified')}</p>
+                <p><strong>${language === 'ar' ? 'النوع:' : 'Type:'}</strong> ${invoice.type === 'sales' ? (language === 'ar' ? 'فاتورة مبيعات' : 'Sales Invoice') : invoice.type === 'purchase' ? (language === 'ar' ? 'فاتورة شراء' : 'Purchase Invoice') : (language === 'ar' ? 'غير محدد' : 'Not specified')}</p>
+              </div>
+              <div>
+                <h3 style="color: #333; margin-bottom: 15px;">${language === 'ar' ? 'معلومات العميل:' : 'Customer Information:'}</h3>
+                <p><strong>${language === 'ar' ? 'اسم العميل:' : 'Customer Name:'}</strong> ${invoice.customer}</p>
+                <p><strong>${language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'}</strong> ${invoice.customerEmail || (language === 'ar' ? 'غير محدد' : 'Not specified')}</p>
+                <p><strong>${language === 'ar' ? 'رقم الهاتف:' : 'Phone:'}</strong> ${invoice.customerPhone || (language === 'ar' ? 'غير محدد' : 'Not specified')}</p>
+              </div>
+            </div>
+            
+            <!-- تفاصيل المنتجات -->
+            ${invoice.items && invoice.items.length > 0 ? `
+            <div style="margin-bottom: 30px;">
+              <h3 style="color: #333; margin-bottom: 15px;">${language === 'ar' ? 'المنتجات/الخدمات:' : 'Products/Services:'}</h3>
+              <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                <thead>
+                  <tr style="background-color: #f8f9fa;">
+                    <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">${language === 'ar' ? 'الوصف' : 'Description'}</th>
+                    <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">${language === 'ar' ? 'الكمية' : 'Quantity'}</th>
+                    <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">${language === 'ar' ? 'السعر الوحدة' : 'Unit Price'}</th>
+                    <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">${language === 'ar' ? 'الإجمالي' : 'Total'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${invoice.items.map(item => `
+                    <tr>
+                      <td style="border: 1px solid #ddd; padding: 12px;">${item.description}</td>
+                      <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">${item.quantity}</td>
+                      <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">${item.unitPrice} ${language === 'ar' ? 'ريال' : 'SAR'}</td>
+                      <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">${item.total} ${language === 'ar' ? 'ريال' : 'SAR'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            ` : ''}
+            
+            <!-- ملخص مالي -->
+            <div style="margin-bottom: 30px;">
+              <h3 style="color: #333; margin-bottom: 15px;">${language === 'ar' ? 'الملخص المالي:' : 'Financial Summary:'}</h3>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+                <div>
+                  <p><strong>${language === 'ar' ? 'المبلغ الإجمالي:' : 'Total Amount:'}</strong></p>
+                  <p><strong>${language === 'ar' ? 'حالة الدفع:' : 'Payment Status:'}</strong></p>
+                </div>
+                <div style="text-align: right;">
+                  <p style="font-size: 24px; color: #2563eb; font-weight: bold;">${(invoice.total || invoice.amount || 0).toLocaleString()} ${language === 'ar' ? 'ريال' : 'SAR'}</p>
+                  <p style="font-size: 18px; color: ${invoice.paymentStatus === 'paid' ? '#10b981' : invoice.paymentStatus === 'partial' ? '#f59e0b' : '#ef4444'};">
+                    ${invoice.paymentStatus === 'paid' ? (language === 'ar' ? 'مدفوع' : 'Paid') : 
+                      invoice.paymentStatus === 'partial' ? (language === 'ar' ? 'مدفوع جزئياً' : 'Partially Paid') : 
+                      invoice.paymentStatus === 'unpaid' ? (language === 'ar' ? 'غير مدفوع' : 'Unpaid') : 
+                      invoice.status || (language === 'ar' ? 'غير محدد' : 'Not specified')}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            ${invoice.description ? `
+            <div style="margin-bottom: 30px;">
+              <h3 style="color: #333; margin-bottom: 15px;">${language === 'ar' ? 'الوصف:' : 'Description:'}</h3>
+              <p style="padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-right: 4px solid #2563eb;">${invoice.description}</p>
+            </div>
+            ` : ''}
+            
+            <!-- تذييل الفاتورة -->
+            <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #333; text-align: center;">
+              <p style="color: #666; font-size: 14px;">${language === 'ar' ? 'تم إنشاء هذا التقرير في:' : 'Generated on:'} ${new Date().toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US')}</p>
+              <p style="color: #666; font-size: 12px;">${language === 'ar' ? 'شركة برصة هلال - جميع الحقوق محفوظة' : 'Bursa Hilal Company - All rights reserved'}</p>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // إضافة العنصر إلى الصفحة
+      document.body.appendChild(invoiceElement);
+      
+      // تحويل العنصر إلى صورة
+      const canvas = await html2canvas(invoiceElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
       });
-    } else {
-      // للمتصفحات القديمة
-      fallbackCopyToClipboard(invoiceUrl);
+      
+      // إنشاء PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      // إضافة الصورة الأولى
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      // إضافة صفحات إضافية إذا لزم الأمر
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      // إضافة صورة الملف المرفق إذا كان صورة
+      if (invoice.attachedFile && invoice.attachedFile.mimetype.startsWith('image/')) {
+        const img = new window.Image();
+        img.crossOrigin = 'anonymous';
+        img.src = `/server/uploads/invoices/${invoice.attachedFile.filename}`;
+        await new Promise((resolve) => { img.onload = resolve; });
+        const imgCanvas = document.createElement('canvas');
+        imgCanvas.width = img.width;
+        imgCanvas.height = img.height;
+        imgCanvas.getContext('2d')?.drawImage(img, 0, 0);
+        const imgData2 = imgCanvas.toDataURL('image/png');
+        pdf.addPage();
+        pdf.setFontSize(18);
+        pdf.text(language === 'ar' ? 'صورة الفاتورة المرفوعة:' : 'Attached Invoice Image:', 15, 20);
+        pdf.addImage(imgData2, 'PNG', 10, 30, 190, 0);
+      }
+      
+      // حفظ PDF
+      pdf.save(`invoice-${invoice.invoiceNumber || invoice.id}-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      // إزالة العنصر المؤقت
+      document.body.removeChild(invoiceElement);
+      
+      showSuccessToast(language === "ar" ? "تم تصدير الفاتورة كـ PDF بنجاح" : "Invoice exported as PDF successfully");
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      showErrorToast(language === "ar" ? "فشل في تصدير PDF" : "Failed to export PDF");
     }
   };
 
-  // دالة بديلة لنسخ النص
-  const fallbackCopyToClipboard = (text: string) => {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      showSuccessToast(
-        language === "ar" 
-          ? "تم نسخ رابط الفاتورة إلى الحافظة" 
-          : "Invoice link copied to clipboard"
-      );
-    } catch (err) {
-      showErrorToast(
-        language === "ar" 
-          ? "فشل في نسخ الرابط" 
-          : "Failed to copy link"
-      );
-    }
-    document.body.removeChild(textArea);
-  };
 
   const handleDeleteInvoice = (invoice: Invoice) => {
     setInvoiceToDelete(invoice);
@@ -925,10 +1172,71 @@ export default function Invoices() {
       showSuccessToast(language === "ar" ? "تم حذف الفاتورة بنجاح" : "Invoice deleted successfully");
     } catch (error) {
       console.error("Error deleting invoice:", error);
-      showErrorToast(language === "ar" ? "فشل في حذف الفاتورة" : "Failed to delete invoice");
+      showErrorToast(language === "ar" ? "حدث خطأ أثناء حذف الفاتورة" : "An error occurred while deleting the invoice");
     } finally {
       setShowDeleteModal(false);
       setInvoiceToDelete(null);
+    }
+  };
+
+  // 3. أضف مودال تعديل الفاتورة
+  function EditInvoiceModal({ isOpen, invoice, onClose, onSave }: { isOpen: boolean; invoice: Invoice | null; onClose: () => void; onSave: (updated: Invoice) => void; }) {
+    const { language } = useLanguage();
+    const [formData, setFormData] = useState<Invoice | null>(invoice);
+    useEffect(() => { setFormData(invoice); }, [invoice]);
+    if (!isOpen || !formData) return null;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-gray-900">{language === "ar" ? "تعديل الفاتورة" : "Edit Invoice"}</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="w-6 h-6" /></button>
+          </div>
+          <form onSubmit={e => { e.preventDefault(); onSave(formData); }} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{language === "ar" ? "رقم الفاتورة" : "Invoice Number"}</label>
+              <input type="text" value={formData.invoiceNumber || ""} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{language === "ar" ? "اسم العميل" : "Customer"}</label>
+              <input type="text" value={formData.customer || ""} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{language === "ar" ? "المبلغ" : "Amount"}</label>
+              <input type="number" value={formData.amount || ""} onChange={e => setFormData(f => f ? { ...f, amount: Number(e.target.value) } : f)} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{language === "ar" ? "تاريخ الفاتورة" : "Date"}</label>
+              <input type="date" value={formData.date || ""} onChange={e => setFormData(f => f ? { ...f, date: e.target.value } : f)} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{language === "ar" ? "تاريخ الاستحقاق" : "Due Date"}</label>
+              <input type="date" value={formData.dueDate || ""} onChange={e => setFormData(f => f ? { ...f, dueDate: e.target.value } : f)} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{language === "ar" ? "الوصف" : "Description"}</label>
+              <textarea value={formData.description || ""} onChange={e => setFormData(f => f ? { ...f, description: e.target.value } : f)} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div className="flex space-x-3 pt-4 rtl:space-x-reverse">
+              <button type="button" onClick={onClose} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">{language === "ar" ? "إلغاء" : "Cancel"}</button>
+              <button type="submit" className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">{language === "ar" ? "حفظ التعديلات" : "Save Changes"}</button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // 4. أضف منطق حفظ التعديلات
+  const handleSaveEdit = async (updated: Invoice) => {
+    try {
+      await apiService.updateInvoice(updated.id, updated);
+      setInvoices(prev => prev.map(inv => inv.id === updated.id ? { ...inv, ...updated } : inv));
+      showSuccessToast(language === "ar" ? "تم تحديث الفاتورة بنجاح" : "Invoice updated successfully");
+      setShowEditModal(false);
+      setInvoiceToEdit(null);
+    } catch (error) {
+      showErrorToast(language === "ar" ? "فشل في تحديث الفاتورة" : "Failed to update invoice");
     }
   };
 
@@ -1025,7 +1333,9 @@ export default function Invoices() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  <AnimatedCounter value={stat.value} />
+                </p>
               </div>
               <div className={`p-3 rounded-lg bg-${stat.color}-100 text-${stat.color}-600`}>
                 <stat.icon className="w-6 h-6" />
@@ -1173,11 +1483,18 @@ export default function Invoices() {
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleShareInvoice(invoice)}
-                        className="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors"
-                        title={language === "ar" ? "مشاركة الفاتورة" : "Share Invoice"}
+                        onClick={() => handleExportPDF(invoice)}
+                        className="text-purple-600 hover:text-purple-800 p-1 rounded transition-colors"
+                        title={language === "ar" ? "تصدير PDF" : "Export PDF"}
                       >
-                        <Share2 className="w-4 h-4" />
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleEditInvoice(invoice)}
+                        className="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors"
+                        title={language === "ar" ? "تعديل" : "Edit"}
+                      >
+                        <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteInvoice(invoice)}
@@ -1232,7 +1549,22 @@ export default function Invoices() {
             invoiceNumber={invoiceToDelete?.invoiceNumber || invoiceToDelete?.id || ""}
           />
         )}
+        {showEditModal && (
+          <EditInvoiceModal isOpen={showEditModal} invoice={invoiceToEdit} onClose={() => { setShowEditModal(false); setInvoiceToEdit(null); }} onSave={handleSaveEdit} />
+        )}
       </AnimatePresence>
     </div>
   );
 }
+
+// 3. عند الإنشاء، اجلب آخر رقم تسلسلي للفواتير
+const getNextInvoiceNumber = (invoices: any[]) => {
+  const numbers = invoices
+    .map(inv => inv.invoiceNumber)
+    .filter(Boolean)
+    .map(num => parseInt((num || '').replace(/INV-/, '')))
+    .filter(n => !isNaN(n));
+  const max = numbers.length > 0 ? Math.max(...numbers) : 0;
+  const next = (max + 1).toString().padStart(3, '0');
+  return `INV-${next}`;
+};

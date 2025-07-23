@@ -21,6 +21,44 @@ import {
   Filter,
 } from "lucide-react";
 
+// Animated Counter Component
+function AnimatedCounter({
+  value,
+  duration = 2000,
+  suffix = "",
+  prefix = "",
+}: {
+  value: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value, duration]);
+
+  return (
+    <span>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
+
 interface TimelineStep {
   id: string;
   title: string;
@@ -332,7 +370,9 @@ export default function TrackOrder() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  <AnimatedCounter value={stat.value} />
+                </p>
               </div>
               <div
                 className={`p-3 rounded-lg bg-${stat.color}-100 text-${stat.color}-600`}

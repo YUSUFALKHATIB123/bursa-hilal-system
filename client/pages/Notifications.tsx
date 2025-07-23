@@ -16,6 +16,44 @@ import {
   User,
 } from "lucide-react";
 
+// Animated Counter Component
+function AnimatedCounter({
+  value,
+  duration = 2000,
+  suffix = "",
+  prefix = "",
+}: {
+  value: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value, duration]);
+
+  return (
+    <span>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
+
 interface ToastNotification {
   id: string;
   title: string;
@@ -263,7 +301,9 @@ export default function Notifications() {
               <p className="text-sm font-medium text-gray-600">
                 {language === "ar" ? "إجمالي الإشعارات" : "Total Notifications"}
               </p>
-              <p className="text-2xl font-bold text-gray-900">{totalNotifications}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                <AnimatedCounter value={totalNotifications} />
+              </p>
             </div>
           </div>
         </div>
@@ -277,7 +317,9 @@ export default function Notifications() {
               <p className="text-sm font-medium text-gray-600">
                 {language === "ar" ? "عالية الأولوية" : "High Priority"}
               </p>
-              <p className="text-2xl font-bold text-gray-900">{highPriorityCount}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                <AnimatedCounter value={highPriorityCount} />
+              </p>
             </div>
           </div>
         </div>
@@ -291,7 +333,9 @@ export default function Notifications() {
               <p className="text-sm font-medium text-gray-600">
                 {language === "ar" ? "اليوم" : "Today"}
               </p>
-              <p className="text-2xl font-bold text-gray-900">{todayCount}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                <AnimatedCounter value={todayCount} />
+              </p>
             </div>
           </div>
         </div>

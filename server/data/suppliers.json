@@ -1,28 +1,131 @@
-
 [
-    {
-      "id": "SUP-001",
-      "name": "Turkish Textile Co.",
-      "email": "orders@turkishtextile.com",
-      "phone": "+90-212-123-4567",
-      "address": "Istanbul, Turkey",
-      "products": ["Velvet", "Silk"],
-      "rating": 4.5,
-      "lastOrderDate": "2024-12-25",
-      "totalOrders": 15,
-      "totalSpent": 85000
-    },
-    {
-      "id": "SUP-002",
-      "name": "Italian Fabrics Ltd.",
-      "email": "sales@italianfabrics.it",
-      "phone": "+39-02-987-6543",
-      "address": "Milan, Italy",
-      "products": ["Nubuk", "Leather"],
-      "rating": 4.8,
-      "lastOrderDate": "2024-12-20",
-      "totalOrders": 8,
-      "totalSpent": 42000
-    }
+  {
+    "id": "SUP-002",
+    "name": "Italian Fabrics Ltd.",
+    "email": "sales@italianfabrics.it",
+    "phone": "+39-02-987-6543",
+    "address": "Milan, Italy",
+    "products": [
+      "Nubuk",
+      "Leather"
+    ],
+    "rating": 4.8,
+    "lastOrderDate": "2024-12-20",
+    "totalOrders": 8,
+    "totalSpent": 42000,
+    "invoices": [
+      {
+        "id": "SUPINV-1752762546101",
+        "date": "2025-07-17",
+        "quantity": "520",
+        "notes": "test",
+        "file": {
+          "originalName": "ChatGPT Image Jun 22, 2025, 10_04_00 AM.png",
+          "filename": "supplier-invoice-1752762545725-411352426.png",
+          "path": "E:\\Bursa Hilal system\\home\\ubuntu\\server\\uploads\\supplier-invoices\\supplier-invoice-1752762545725-411352426.png",
+          "size": 1516101,
+          "mimetype": "image/png",
+          "uploadDate": "2025-07-17T14:29:06.101Z"
+        },
+        "pieces": "5"
+      },
+      {
+        "id": "SUPINV-1752782941004",
+        "date": "2025-07-17",
+        "quantity": "100",
+        "notes": "",
+        "file": {
+          "originalName": "logo.png",
+          "filename": "supplier-invoice-1752782940998-763577745.png",
+          "path": "E:\\Bursa Hilal system\\home\\ubuntu\\server\\uploads\\supplier-invoices\\supplier-invoice-1752782940998-763577745.png",
+          "size": 64048,
+          "mimetype": "image/png",
+          "uploadDate": "2025-07-17T20:09:01.004Z"
+        }
+      },
+      {
+        "id": "SUPINV-1752782973912",
+        "date": "2025-07-17",
+        "quantity": "100",
+        "notes": "",
+        "file": {
+          "originalName": "logo.png",
+          "filename": "supplier-invoice-1752782973580-174066071.png",
+          "path": "E:\\Bursa Hilal system\\home\\ubuntu\\server\\uploads\\supplier-invoices\\supplier-invoice-1752782973580-174066071.png",
+          "size": 64048,
+          "mimetype": "image/png",
+          "uploadDate": "2025-07-17T20:09:33.912Z"
+        }
+      },
+      {
+        "id": "SUPINV-1752959794569",
+        "date": "2025-07-21",
+        "quantity": "5555",
+        "notes": "سسس",
+        "file": {
+          "originalName": "WhatsApp Image 2024-10-26 at 15.02.52.jpeg",
+          "filename": "supplier-invoice-1752959794559-752756141.jpeg",
+          "path": "E:\\Bursa Hilal system\\home\\ubuntu\\server\\uploads\\supplier-invoices\\supplier-invoice-1752959794559-752756141.jpeg",
+          "size": 141131,
+          "mimetype": "image/jpeg",
+          "uploadDate": "2025-07-19T21:16:34.569Z"
+        }
+      }
+    ]
+  },
+  {
+    "id": "SUP-1752753481524",
+    "name": "karasi",
+    "contact": "murad",
+    "email": "yousef.alkhatib.ya@gmail.com",
+    "phone": "05343169913",
+    "location": "bursa",
+    "specialization": "Silk Production",
+    "rating": "5",
+    "notes": "test"
+  },
+  {
+    "id": "SUP-1752753501445",
+    "name": "werwer",
+    "contact": "murad",
+    "email": "yousef.alkhatib.ya@gmail.com",
+    "phone": "05343168831",
+    "location": "werwer",
+    "specialization": "Finishing Services",
+    "rating": "5",
+    "notes": "were"
+  },
+  {
+    "id": "SUP-1752753805141",
+    "name": "karasi",
+    "contact": "murad",
+    "email": "yousef.alkhatib.ya@gmail.com",
+    "phone": "05343168831",
+    "location": "bursa",
+    "specialization": "Silk Production",
+    "rating": "5",
+    "notes": "asd"
+  },
+  {
+    "id": "SUP-1752759290785",
+    "name": "Bursa Hilal Tekstil",
+    "contact": "YUSUF ALKHATIB",
+    "email": "yousef.alkhatib.ya@gmail.com",
+    "phone": "05343168831",
+    "location": "bursa",
+    "specialization": "Silk Production",
+    "rating": "5",
+    "notes": "شسيشسي"
+  },
+  {
+    "id": "SUP-1752771935518",
+    "name": "Libya Textile Co.",
+    "contact": "YUSUF ALKHATIB",
+    "email": "yousef.alkhatib.ya@gmail.com",
+    "phone": "05343168831",
+    "location": "بنغازي، ليبيا",
+    "specialization": "Silk Production",
+    "rating": "5",
+    "notes": ""
+  }
 ]
-

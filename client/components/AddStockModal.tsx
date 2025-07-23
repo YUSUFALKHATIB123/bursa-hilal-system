@@ -16,8 +16,6 @@ export default function AddStockModal({ isOpen, onClose }: AddStockModalProps) {
     color: "",
     quantity: "",
     unitPrice: "",
-    location: "",
-    supplier: "",
   });
 
   if (!isOpen) return null;
@@ -40,8 +38,6 @@ export default function AddStockModal({ isOpen, onClose }: AddStockModalProps) {
       color: "",
       quantity: "",
       unitPrice: "",
-      location: "",
-      supplier: "",
     });
   };
 
@@ -165,46 +161,6 @@ export default function AddStockModal({ isOpen, onClose }: AddStockModalProps) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {language === "ar" ? "المكان" : "Location"}
-            </label>
-            <select
-              name="location"
-              value={formData.location}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
-            >
-              <option value="">
-                {language === "ar" ? "اختر المكان" : "Select location"}
-              </option>
-              <option value="Warehouse A">
-                {language === "ar" ? "مخزن أ" : "Warehouse A"}
-              </option>
-              <option value="Warehouse B">
-                {language === "ar" ? "مخزن ب" : "Warehouse B"}
-              </option>
-              <option value="Production Floor">
-                {language === "ar" ? "أرضية الإنتاج" : "Production Floor"}
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {language === "ar" ? "المورد" : "Supplier"}
-            </label>
-            <input
-              type="text"
-              name="supplier"
-              value={formData.supplier}
-              onChange={handleInputChange}
-              placeholder={language === "ar" ? "اسم المورد" : "Supplier name"}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
-            />
-          </div>
-
           {/* Buttons */}
           <div className="flex space-x-3 pt-4">
             <button
@@ -219,7 +175,7 @@ export default function AddStockModal({ isOpen, onClose }: AddStockModalProps) {
               onClick={onClose}
               className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              {t("cancel")}
+              {language === "ar" ? "إلغاء" : "Cancel"}
             </button>
           </div>
         </form>

@@ -17,6 +17,9 @@ import {
   CheckCircle,
   FileText,
   TrendingUp,
+  Sun,
+  Moon,
+  Timer,
 } from "lucide-react";
 
 interface Employee {
@@ -37,6 +40,7 @@ interface Employee {
     date: string;
     status: "present" | "absent";
     timestamp: string;
+    note?: string; // Added note field
   }>;
   salaryTransactions?: Array<{
     date: string;
@@ -45,6 +49,7 @@ interface Employee {
     timestamp: string;
     description: string;
   }>;
+  dailyHours?: number; // Added dailyHours field
 }
 
 interface EmployeeDetailModalProps {
@@ -69,10 +74,13 @@ export default function EmployeeDetailModal({
   const [saving, setSaving] = useState(false);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [notesLoading, setNotesLoading] = useState(false);
-  const [attendanceDate, setAttendanceDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-  const [attendanceStatus, setAttendanceStatus] = useState("present");
+  const [attendanceNote, setAttendanceNote] = useState("");
+  const [editingShift, setEditingShift] = useState(false);
+  const [shiftType, setShiftType] = useState(employee?.shift || "");
+  const [shiftHours, setShiftHours] = useState(employee?.hoursWorked || 0);
+  const [savingShift, setSavingShift] = useState(false);
+  // أضف متغير dailyHours في useState
+  const [dailyHours, setDailyHours] = useState(employee?.dailyHours || 8);
 
   // Calculate real performance score based on attendance data
   const calculatePerformanceScore = (emp: Employee) => {
@@ -258,6 +266,21 @@ export default function EmployeeDetailModal({
     try {
       setAttendanceLoading(true);
 
+      // Check if attendance already exists for today
+      const today = new Date().toISOString().split("T")[0];
+      const existingAttendance = employee.attendance?.find(
+        record => record.date === today
+      );
+
+      if (existingAttendance) {
+        showErrorToast(
+          language === "ar"
+            ? "تم تسجيل الحضور لهذا اليوم مسبقاً"
+            : "Attendance already marked for today"
+        );
+        return;
+      }
+
       let updatedEmployee = { ...employee };
       
       // Initialize attendance array if it doesn't exist
@@ -265,11 +288,12 @@ export default function EmployeeDetailModal({
         updatedEmployee.attendance = [];
       }
 
-      // Add new attendance record
+      // Add new attendance record with today's date
       const attendanceRecord = {
-        date: attendanceDate,
+        date: today,
         status: type,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        note: attendanceNote // أضف الملاحظة هنا
       };
 
       updatedEmployee.attendance.push(attendanceRecord);
@@ -278,7 +302,7 @@ export default function EmployeeDetailModal({
         // Mark as present - update last work date and hours
         updatedEmployee = {
           ...updatedEmployee,
-          lastWorkDate: attendanceDate,
+          lastWorkDate: today,
           hoursWorked: employee.hoursWorked + 8, // Add 8 hours for a full day
           status: "active" as const,
         };
@@ -295,9 +319,11 @@ export default function EmployeeDetailModal({
 
       showSuccessToast(
         language === "ar"
-          ? `تم تسجيل ${type === "present" ? "الحضور" : "الغياب"} بنجاح للتاريخ ${attendanceDate}`
-          : `${type === "present" ? "Attendance" : "Absence"} marked successfully for ${attendanceDate}`
+          ? `تم تسجيل ${type === "present" ? "الحضور" : "الغياب"} بنجاح للتاريخ ${today}`
+          : `${type === "present" ? "Attendance" : "Absence"} marked successfully for ${today}`
       );
+
+      setAttendanceNote(""); // إعادة تعيين الملاحظة بعد التسجيل
 
       if (onEmployeeUpdate) {
         onEmployeeUpdate();
@@ -497,24 +523,96 @@ export default function EmployeeDetailModal({
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                    <Clock className="w-5 h-5 text-blue-500 mr-2" />
                     {language === "ar" ? "معلومات الوردية" : "Shift Information"}
                   </h4>
-                  <p className="text-gray-600">
-                    {language === "ar" ? "الوردية" : "Shift"}:{" "}
-                    {language === "ar"
-                      ? employee?.shift || "غير محدد"
-                      : employee?.shift === "الصباحية"
-                      ? "Morning"
-                      : employee?.shift === "المسائية"
-                      ? "Evening"
-                      : "Night"}
-                  </p>
-                  <p className="text-gray-600">
-                    {language === "ar" ? "ساعات إضافية" : "Overtime"}:{" "}
-                    {employee?.overtime || 0} {language === "ar" ? "ساعة" : "hours"}
-                  </p>
+                  {editingShift ? (
+                    <div className="flex flex-col md:flex-row md:items-center gap-2">
+                      <select
+                        value={shiftType}
+                        onChange={e => setShiftType(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="الصباحية">{language === "ar" ? "الصباحية" : "Morning"}</option>
+                        <option value="المسائية">{language === "ar" ? "المسائية" : "Evening"}</option>
+                        <option value="الليلية">{language === "ar" ? "الليلية" : "Night"}</option>
+                      </select>
+                      <input
+                        type="number"
+                        min={0}
+                        value={dailyHours}
+                        onChange={e => setDailyHours(Number(e.target.value))}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-32"
+                        placeholder={language === "ar" ? "عدد الساعات اليومية" : "Daily Hours"}
+                      />
+                      <button
+                        onClick={async () => {
+                          setSavingShift(true);
+                          try {
+                            await apiService.updateEmployee(employee.id, { shift: shiftType, dailyHours });
+                            showSuccessToast(language === "ar" ? "تم تحديث معلومات الوردية" : "Shift info updated");
+                            setEditingShift(false);
+                            if (onEmployeeUpdate) onEmployeeUpdate();
+                          } catch (e) {
+                            showErrorToast(language === "ar" ? "فشل في تحديث الوردية" : "Failed to update shift");
+                          } finally {
+                            setSavingShift(false);
+                          }
+                        }}
+                        disabled={savingShift}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+                      >
+                        {savingShift ? ( <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> ) : (language === "ar" ? "حفظ" : "Save")}
+                      </button>
+                      <button
+                        onClick={() => setEditingShift(false)}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                      >
+                        {language === "ar" ? "إلغاء" : "Cancel"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col items-center justify-center">
+                        <span className="text-gray-500 text-sm mb-1 flex items-center">
+                          {/* أيقونة حسب نوع الوردية */}
+                          {shiftType === "الصباحية" ? (
+                            <Sun className="w-4 h-4 text-yellow-500 mr-1" />
+                          ) : shiftType === "المسائية" ? (
+                            <Moon className="w-4 h-4 text-purple-500 mr-1" />
+                          ) : (
+                            <Clock className="w-4 h-4 text-blue-500 mr-1" />
+                          )}
+                          {language === "ar" ? "نوع الوردية" : "Shift Type"}
+                        </span>
+                        <span className="text-lg font-bold text-blue-900">{shiftType}</span>
+                      </div>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex flex-col items-center justify-center">
+                        <span className="text-gray-500 text-sm mb-1 flex items-center">
+                          <Timer className="w-4 h-4 text-green-500 mr-1" />
+                          {language === "ar" ? "عدد الساعات اليومية" : "Daily Hours"}
+                        </span>
+                        <span className="text-lg font-bold text-green-900">{dailyHours}</span>
+                      </div>
+                      <div className="col-span-2 flex justify-end mt-2 gap-2">
+                        <button
+                          onClick={() => setEditingShift(true)}
+                          className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
+                        >
+                          <Edit className="w-4 h-4 inline mr-1" />
+                          {language === "ar" ? "تعديل" : "Edit"}
+                        </button>
+                        <button
+                          onClick={onClose}
+                          className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold shadow"
+                        >
+                          {language === "ar" ? "إغلاق" : "Close"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -702,42 +800,70 @@ export default function EmployeeDetailModal({
                     {language === "ar" ? "تسجيل الحضور" : "Mark Attendance"}
                   </h4>
                   <div className="space-y-4">
-                    <div>
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {language === "ar" ? "تاريخ الحضور" : "Attendance Date"}
+                        {language === "ar" ? "تاريخ اليوم" : "Today's Date"}
                       </label>
-                      <input
-                        type="date"
-                        value={attendanceDate}
-                        onChange={(e) => setAttendanceDate(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                      <p className="text-lg font-semibold text-blue-800">
+                        {new Date().toLocaleDateString("en-US", {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                      {(() => {
+                        const today = new Date().toISOString().split("T")[0];
+                        const todayAttendance = employee?.attendance?.find(record => record.date === today);
+                        if (todayAttendance) {
+                          return (
+                            <div className="mt-2 p-2 bg-green-100 rounded border border-green-300">
+                              <p className="text-sm text-green-800 font-medium">
+                                {language === "ar" 
+                                  ? `تم تسجيل ${todayAttendance.status === 'present' ? 'الحضور' : 'الغياب'} لهذا اليوم`
+                                  : `Already marked as ${todayAttendance.status === 'present' ? 'Present' : 'Absent'} today`
+                                }
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <button
-                        onClick={() => markAttendance('present')}
-                        disabled={attendanceLoading}
-                        className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
-                      >
-                        {attendanceLoading ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        ) : (
-                          <CheckCircle className="w-4 h-4" />
-                        )}
-                        <span>{language === "ar" ? "تسجيل حضور" : "Mark Present"}</span>
-                      </button>
-                      <button
-                        onClick={() => markAttendance('absent')}
-                        disabled={attendanceLoading}
-                        className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
-                      >
-                        {attendanceLoading ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        ) : (
-                          <AlertTriangle className="w-4 h-4" />
-                        )}
-                        <span>{language === "ar" ? "تسجيل غياب" : "Mark Absent"}</span>
-                      </button>
+                      {(() => {
+                        const today = new Date().toISOString().split("T")[0];
+                        const todayAttendance = employee?.attendance?.find(record => record.date === today);
+                        const isDisabled = attendanceLoading || !!todayAttendance;
+                        
+                        return (
+                          <>
+                            <button
+                              onClick={() => markAttendance('present')}
+                              disabled={isDisabled}
+                              className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+                            >
+                              {attendanceLoading ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              ) : (
+                                <CheckCircle className="w-4 h-4" />
+                              )}
+                              <span>{language === "ar" ? "تسجيل حضور" : "Mark Present"}</span>
+                            </button>
+                            <button
+                              onClick={() => markAttendance('absent')}
+                              disabled={isDisabled}
+                              className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+                            >
+                              {attendanceLoading ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              ) : (
+                                <AlertTriangle className="w-4 h-4" />
+                              )}
+                              <span>{language === "ar" ? "تسجيل غياب" : "Mark Absent"}</span>
+                            </button>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -764,7 +890,11 @@ export default function EmployeeDetailModal({
                           </span>
                         </div>
                         <span className="text-sm text-gray-600">
-                          {new Date(record.date).toLocaleDateString(language === "ar" ? "ar-SA" : "en-US")}
+                          {new Date(record.date).toLocaleDateString("en-US", {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
                         </span>
                       </div>
                     ))}
@@ -959,14 +1089,7 @@ export default function EmployeeDetailModal({
           </div>
 
           {/* Footer */}
-          <div className="border-t border-gray-200 p-6 flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {language === "ar" ? "إغلاق" : "Close"}
-            </button>
-          </div>
+          {/* احذف أي زر إغلاق آخر في المودال (سواء في الأعلى أو الأسفل) */}
         </motion.div>
       </motion.div>
     );

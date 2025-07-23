@@ -30,48 +30,8 @@
     "notes": "Payment completed in full",
     "createdDate": "2025-01-08",
     "lastPaymentDate": "2025-01-08",
-    "isOverdue": false
-  },
-  {
-    "id": "INV-003",
-    "invoiceNumber": "INV-003",
-    "customer": "Cairo Fashion House",
-    "customerEmail": "finance@cairo-fashion.eg",
-    "customerPhone": "+20-2-123-4567",
-    "customerAddress": "القاهرة، مصر",
-    "date": "2024-12-15",
-    "dueDate": "2025-01-14",
-    "type": "sales",
-    "typeLabel": "فاتورة بيع",
-    "items": [
-      {
-        "id": 1,
-        "description": "Velvet Red",
-        "quantity": 300,
-        "unit": "meter",
-        "unitPrice": 12,
-        "total": 3600
-      }
-    ],
-    "subtotal": 3600,
-    "tax": 360,
-    "total": 3960,
-    "amountReceived": 0,
-    "amountRemaining": 3960,
-    "paymentStatus": "unpaid",
-    "paymentMethod": "cash",
-    "notes": "Payment overdue - follow up required",
-    "createdDate": "2024-12-15",
-    "lastPaymentDate": null,
-    "isOverdue": true
-  },
-  {
-    "id": "INV-1752392475271",
-    "amount": 1000,
-    "status": "unpaid",
-    "description": "Test Invoice",
-    "customer": "Test Customer",
-    "dueDate": "2025-01-20"
+    "isOverdue": false,
+    "amount": 500
   },
   {
     "id": "INV-1752399283720",
@@ -95,5 +55,76 @@
     "description": "اختبار",
     "type": "purchase",
     "paymentStatus": "unpaid"
+  },
+  {
+    "id": "INV-1753022875102",
+    "date": "2025-07-20",
+    "createdAt": "2025-07-20T14:47:55.102Z",
+    "customer": "شركة ABC",
+    "customerId": "CUST-002",
+    "orderId": "",
+    "amount": 1111,
+    "total": 1111,
+    "dueDate": "2025-07-20",
+    "description": "",
+    "type": "purchase",
+    "paymentStatus": "unpaid"
+  },
+  {
+    "id": "INV-1753027471398",
+    "date": "2025-07-20",
+    "createdAt": "2025-07-20T16:04:31.398Z",
+    "customer": "شركة ABC",
+    "customerId": "CUST-002",
+    "orderId": "",
+    "amount": 1000,
+    "total": 1000,
+    "dueDate": "2025-07-20",
+    "description": "",
+    "type": "sales",
+    "paymentStatus": "unpaid"
+  },
+  {
+    "id": "INV-1753027560296",
+    "date": "2025-07-20",
+    "createdAt": "2025-07-20T16:06:00.296Z",
+    "customer": "Libya Textile Co.",
+    "customerId": "CUST-001",
+    "orderId": "",
+    "amount": 1000,
+    "total": 1000,
+    "dueDate": "2025-07-20",
+    "description": "",
+    "type": "sales",
+    "paymentStatus": "unpaid"
+  },
+  {
+    "id": "INV-1753191933785",
+    "date": "2025-07-22",
+    "createdAt": "2025-07-22T13:45:33.785Z",
+    "customer": "شركة ABC",
+    "customerId": "CUST-002",
+    "orderId": "",
+    "amount": 5000,
+    "total": 5000,
+    "dueDate": "2025-07-22",
+    "description": "تم",
+    "type": "sales",
+    "paymentStatus": "paid"
+  },
+  {
+    "id": "INV-1753193555912",
+    "date": "2025-07-22",
+    "createdAt": "2025-07-22T14:12:35.912Z",
+    "invoiceNumber": "INV-004",
+    "customer": "YUSUF ALKHATIB",
+    "customerId": "CUS-1752392699610",
+    "orderId": "",
+    "amount": 5000,
+    "total": 5000,
+    "dueDate": "2025-07-22",
+    "description": "",
+    "type": "sales",
+    "paymentStatus": "paid"
   }
 ]

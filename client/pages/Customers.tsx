@@ -15,6 +15,7 @@ import {
   Mail,
   MapPin,
   Edit,
+  Trash2,
   X,
   DollarSign,
   Package,
@@ -25,6 +26,45 @@ import {
   TrendingUp,
   ShoppingBag,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+// Animated Counter Component
+function AnimatedCounter({
+  value,
+  duration = 2000,
+  suffix = "",
+  prefix = "",
+}: {
+  value: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value, duration]);
+
+  return (
+    <span>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 interface Customer {
   id: string;
@@ -50,11 +90,23 @@ interface Order {
   deadline?: string;
 }
 
+interface Invoice {
+  id: string;
+  customer: string;
+  date: string;
+  total: number;
+  amountReceived: number;
+  amountRemaining: number;
+  paymentStatus: string;
+}
+
 export default function Customers() {
   const { language, t } = useLanguage();
+  const navigate = useNavigate();
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<any | null>(null);
@@ -68,16 +120,19 @@ export default function Customers() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [customersData, ordersData] = await Promise.all([
+      const [customersData, ordersData, invoicesData] = await Promise.all([
         apiService.getCustomers(),
-        apiService.getOrders()
+        apiService.getOrders(),
+        apiService.getInvoices()
       ]);
       setCustomers(Array.isArray(customersData) ? customersData : []);
       setOrders(Array.isArray(ordersData) ? ordersData : []);
+      setInvoices(Array.isArray(invoicesData) ? invoicesData : []);
     } catch (error) {
       console.error("Error fetching data:", error);
       setCustomers([]);
       setOrders([]);
+      setInvoices([]);
     } finally {
       setLoading(false);
     }
@@ -95,19 +150,47 @@ export default function Customers() {
     );
   };
 
+  const getCustomerInvoices = (customerName: string) => {
+    return invoices.filter(invoice => 
+      invoice.customer.toLowerCase() === customerName.toLowerCase()
+    );
+  };
+
   const getCustomerStats = (customer: Customer) => {
     const customerOrders = getCustomerOrders(customer.name);
-    const totalPaid = customer.paid || (customer.totalRevenue * 0.6);
-    const outstanding = customer.outstanding || (customer.totalRevenue - totalPaid);
-    const paymentPercentage = customer.totalRevenue > 0 ? (totalPaid / customer.totalRevenue) * 100 : 0;
-
+    const customerInvoices = getCustomerInvoices(customer.name);
+    // حساب القيم المالية بدقة حسب حالة الدفع
+    let totalRevenue = 0;
+    let totalPaid = 0;
+    let outstanding = 0;
+    customerInvoices.forEach(inv => {
+      const total = inv.total || inv.amount || 0;
+      if (inv.paymentStatus === 'paid') {
+        totalRevenue += total;
+        totalPaid += total;
+      } else if (inv.paymentStatus === 'unpaid') {
+        totalRevenue += total;
+        outstanding += total;
+      } else if (inv.paymentStatus === 'partial') {
+        totalRevenue += total;
+        if (typeof inv.amountReceived === 'number') {
+          totalPaid += inv.amountReceived;
+          outstanding += total - inv.amountReceived;
+        } else {
+          // إذا لم يوجد amountReceived، اعتبر المدفوع = 0 والمتبقي = total
+          outstanding += total;
+        }
+      }
+    });
+    const paymentPercentage = totalRevenue > 0 ? Math.round((totalPaid / totalRevenue) * 100) : 0;
     return {
       orderCount: customerOrders.length,
-      totalRevenue: customer.totalRevenue || 0,
+      totalRevenue,
       totalPaid,
       outstanding,
-      paymentPercentage: Math.round(paymentPercentage),
-      orders: customerOrders
+      paymentPercentage,
+      orders: customerOrders,
+      invoices: customerInvoices
     };
   };
 
@@ -129,6 +212,44 @@ export default function Customers() {
     
     setEditingCustomer(editableCustomer);
     setShowEditModal(true);
+  };
+
+  const handleDeleteCustomer = async (customer: Customer) => {
+    if (window.confirm(language === "ar" 
+      ? `هل أنت متأكد من حذف العميل "${customer.name}"؟` 
+      : `Are you sure you want to delete customer "${customer.name}"?`
+    )) {
+      try {
+        // Here you would typically call the API to delete the customer
+        // For now, we'll update the local state
+        setCustomers(customers.filter(c => c.id !== customer.id));
+        
+        const successMessage = language === "ar"
+          ? "تم حذف العميل بنجاح"
+          : "Customer deleted successfully";
+        toast.success(successMessage, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } catch (error) {
+        console.error("Error deleting customer:", error);
+        const errorMessage = language === "ar"
+          ? "حدث خطأ أثناء حذف العميل"
+          : "An error occurred while deleting the customer";
+        toast.error(errorMessage, {
+          position: "top-center",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    }
   };
 
   const handleSaveCustomer = async (updatedCustomer: any) => {
@@ -217,6 +338,29 @@ export default function Customers() {
               </span>
             </div>
           </div>
+          {/* Action buttons */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditCustomer(customer);
+              }}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title={language === "ar" ? "تعديل" : "Edit"}
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteCustomer(customer);
+              }}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title={language === "ar" ? "حذف" : "Delete"}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -251,7 +395,7 @@ export default function Customers() {
 
   const CustomerModal = ({ customer, onClose }: { customer: Customer; onClose: () => void }) => {
     const stats = getCustomerStats(customer);
-    
+    const [tab, setTab] = useState<'info' | 'finance' | 'orders'>('info');
     return (
       <AnimatePresence>
         <motion.div
@@ -272,217 +416,62 @@ export default function Customers() {
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">{customer.name}</h2>
-                <p className="text-gray-600">
-                  {language === "ar" ? "تفاصيل العميل" : "Customer Details"}
-                </p>
+                <p className="text-gray-600">{language === "ar" ? "تفاصيل العميل" : "Customer Details"}</p>
               </div>
               <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => {
-                    handleEditCustomer(customer);
-                    onClose();
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  <span>{language === "ar" ? "تعديل العميل" : "Edit Customer"}</span>
-                </button>
-                <button
-                  onClick={onClose}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <button onClick={() => { handleEditCustomer(customer); onClose(); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title={language === "ar" ? "تعديل" : "Edit"}><Edit className="w-5 h-5" /></button>
+                <button onClick={() => { handleDeleteCustomer(customer); onClose(); }} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title={language === "ar" ? "حذف" : "Delete"}><Trash2 className="w-5 h-5" /></button>
+                <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
               </div>
             </div>
-
-            <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* القسم الأول: معلومات العميل */}
-              <div className="lg:col-span-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <User className="w-5 h-5 mr-2" />
-                  {language === "ar" ? "معلومات العميل" : "Customer Information"}
-                </h3>
+            {/* Tabs */}
+            <div className="flex border-b border-gray-200 px-6">
+              <button className={`py-2 px-4 -mb-px border-b-2 ${tab === 'info' ? 'border-green-600 text-green-700 font-bold' : 'border-transparent text-gray-500'}`} onClick={() => setTab('info')}>{language === 'ar' ? 'معلومات العميل' : 'Customer Info'}</button>
+              <button className={`py-2 px-4 -mb-px border-b-2 ${tab === 'finance' ? 'border-green-600 text-green-700 font-bold' : 'border-transparent text-gray-500'}`} onClick={() => setTab('finance')}>{language === 'ar' ? 'المعلومات المالية' : 'Financial Info'}</button>
+              <button className={`py-2 px-4 -mb-px border-b-2 ${tab === 'orders' ? 'border-green-600 text-green-700 font-bold' : 'border-transparent text-gray-500'}`} onClick={() => setTab('orders')}>{language === 'ar' ? 'سجل الطلبات' : 'Order History'}</button>
+            </div>
+            <div className="p-6">
+              {tab === 'info' && (
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <User className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-600">
-                        {language === "ar" ? "الاسم الكامل" : "Full Name"}
-                      </p>
-                      <p className="font-medium">{customer.name}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                      customer.customerType === 'premium' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      ★
-                    </span>
-                    <div>
-                      <p className="text-sm text-gray-600">
-                        {language === "ar" ? "نوع العميل" : "Customer Type"}
-                      </p>
-                      <p className="font-medium">
-                        {customer.customerType === 'premium' 
-                          ? (language === "ar" ? 'عميل مميز' : 'Premium Customer')
-                          : (language === "ar" ? 'عميل عادي' : 'Regular Customer')
-                        }
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Phone className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-600">
-                        {language === "ar" ? "رقم الهاتف" : "Phone Number"}
-                      </p>
-                      <p className="font-medium">{customer.phone}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <MapPin className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-600">
-                        {language === "ar" ? "الدولة" : "Address"}
-                      </p>
-                      <p className="font-medium">{customer.address}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Mail className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-600">
-                        {language === "ar" ? "الإيميل" : "Email"}
-                      </p>
-                      <p className="font-medium">{customer.email}</p>
-                    </div>
-                  </div>
-                  {customer.company && (
-                    <div className="flex items-center space-x-3">
-                      <Building className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-600">
-                          {language === "ar" ? "اسم الشركة" : "Company Name"}
-                        </p>
-                        <p className="font-medium">{customer.company}</p>
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-3"><User className="w-5 h-5 text-gray-400" /><div><p className="text-sm text-gray-600">{language === "ar" ? "الاسم الكامل" : "Full Name"}</p><p className="font-medium">{customer.name}</p></div></div>
+                  <div className="flex items-center space-x-3"><span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${customer.customerType === 'premium' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}`}>★</span><div><p className="text-sm text-gray-600">{language === "ar" ? "نوع العميل" : "Customer Type"}</p><p className="font-medium">{customer.customerType === 'premium' ? (language === "ar" ? 'عميل مميز' : 'Premium Customer') : (language === "ar" ? 'عميل عادي' : 'Regular Customer')}</p></div></div>
+                  <div className="flex items-center space-x-3"><Phone className="w-5 h-5 text-gray-400" /><div><p className="text-sm text-gray-600">{language === "ar" ? "رقم الهاتف" : "Phone Number"}</p><p className="font-medium">{customer.phone}</p></div></div>
+                  <div className="flex items-center space-x-3"><MapPin className="w-5 h-5 text-gray-400" /><div><p className="text-sm text-gray-600">{language === "ar" ? "الدولة" : "Address"}</p><p className="font-medium">{customer.address}</p></div></div>
+                  <div className="flex items-center space-x-3"><Mail className="w-5 h-5 text-gray-400" /><div><p className="text-sm text-gray-600">{language === "ar" ? "الإيميل" : "Email"}</p><p className="font-medium">{customer.email}</p></div></div>
+                  {customer.company && (<div className="flex items-center space-x-3"><Building className="w-5 h-5 text-gray-400" /><div><p className="text-sm text-gray-600">{language === "ar" ? "اسم الشركة" : "Company Name"}</p><p className="font-medium">{customer.company}</p></div></div>)}
                 </div>
-              </div>
-
-              {/* القسم الثاني: المعلومات المالية */}
-              <div className="lg:col-span-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <DollarSign className="w-5 h-5 mr-2" />
-                  {language === "ar" ? "المعلومات المالية" : "Financial Information"}
-                </h3>
+              )}
+              {tab === 'finance' && (
                 <div className="space-y-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-blue-600">
-                        {language === "ar" ? "عدد الطلبات" : "Order Count"}
-                      </span>
-                      <span className="text-2xl font-bold text-blue-700">{stats.orderCount}</span>
-                    </div>
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-green-600">
-                        {language === "ar" ? "إجمالي الطلبات" : "Total Revenue"}
-                      </span>
-                      <span className="text-2xl font-bold text-green-700">
-                        ${stats.totalRevenue.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-emerald-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-emerald-600">
-                        {language === "ar" ? "المدفوع" : "Paid"}
-                      </span>
-                      <span className="text-2xl font-bold text-emerald-700">
-                        ${stats.totalPaid.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-red-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-red-600">
-                        {language === "ar" ? "المتبقي" : "Outstanding"}
-                      </span>
-                      <span className="text-2xl font-bold text-red-700">
-                        ${stats.outstanding.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">
-                        {language === "ar" ? "نسبة الدفع" : "Payment Ratio"}
-                      </span>
-                      <span className="text-lg font-bold text-gray-700">{stats.paymentPercentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${stats.paymentPercentage}%` }}
-                      />
-                    </div>
-                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4 flex items-center justify-between"><span className="text-sm text-blue-600">{language === "ar" ? "عدد الطلبات" : "Order Count"}</span><span className="text-2xl font-bold text-blue-700"><AnimatedCounter value={stats.orderCount} /></span></div>
+                  <div className="bg-green-50 rounded-lg p-4 flex items-center justify-between"><span className="text-sm text-green-600">{language === "ar" ? "إجمالي الإيرادات" : "Total Revenue"}</span><span className="text-2xl font-bold text-green-700">$<AnimatedCounter value={stats.totalRevenue} /></span></div>
+                  <div className="bg-emerald-50 rounded-lg p-4 flex items-center justify-between"><span className="text-sm text-emerald-600">{language === "ar" ? "المدفوع" : "Paid"}</span><span className="text-2xl font-bold text-emerald-700">$<AnimatedCounter value={stats.totalPaid} /></span></div>
+                  <div className="bg-red-50 rounded-lg p-4 flex items-center justify-between"><span className="text-sm text-red-600">{language === "ar" ? "المتبقي" : "Outstanding"}</span><span className="text-2xl font-bold text-red-700">$<AnimatedCounter value={stats.outstanding} /></span></div>
+                  <div className="bg-gray-50 rounded-lg p-4"><div className="flex items-center justify-between mb-2"><span className="text-sm text-gray-600">{language === "ar" ? "نسبة الدفع" : "Payment Ratio"}</span><span className="text-lg font-bold text-gray-700"><AnimatedCounter value={stats.paymentPercentage} />%</span></div><div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{ width: `${stats.paymentPercentage}%` }} /></div></div>
                 </div>
-              </div>
-
-              {/* القسم الثالث: سجل الطلبات */}
-              <div className="lg:col-span-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Package className="w-5 h-5 mr-2" />
-                  {language === "ar" ? "سجل الطلبات" : "Order History"}
-                </h3>
+              )}
+              {tab === 'orders' && (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {stats.orders.length > 0 ? (
                     stats.orders.map((order) => (
-                      <div key={order.id} className="border border-gray-200 rounded-lg p-3">
+                      <div key={order.id} className="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/orders/${order.id}`)}>
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium text-gray-900">{order.id}</p>
+                            <p className="font-medium text-blue-700 underline">{order.id}</p>
                             <p className="text-sm text-gray-500">{order.date}</p>
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-green-600">${order.total.toLocaleString()}</p>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              order.status === 'completed' 
-                                ? 'bg-green-100 text-green-800'
-                                : order.status === 'processing'
-                                ? 'bg-blue-100 text-blue-800'
-                                : order.status === 'cancelled'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {order.status === 'completed' 
-                                ? (language === "ar" ? 'مكتمل' : 'Completed')
-                                : order.status === 'processing' 
-                                ? (language === "ar" ? 'قيد التنفيذ' : 'Processing')
-                                : order.status === 'cancelled' 
-                                ? (language === "ar" ? 'ملغي' : 'Cancelled') 
-                                : (language === "ar" ? 'معلق' : 'Pending')
-                              }
-                            </span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${order.status === 'completed' ? 'bg-green-100 text-green-800' : order.status === 'processing' ? 'bg-blue-100 text-blue-800' : order.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>{order.status === 'completed' ? (language === "ar" ? 'مكتمل' : 'Completed') : order.status === 'processing' ? (language === "ar" ? 'قيد التنفيذ' : 'Processing') : order.status === 'cancelled' ? (language === "ar" ? 'ملغي' : 'Cancelled') : (language === "ar" ? 'معلق' : 'Pending')}</span>
                           </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                      <p>{language === "ar" ? "لا توجد طلبات لهذا العميل" : "No orders for this customer"}</p>
-                    </div>
+                    <div className="text-center py-8 text-gray-500"><Package className="w-12 h-12 mx-auto mb-2 text-gray-300" /><p>{language === "ar" ? "لا توجد طلبات لهذا العميل" : "No orders for this customer"}</p></div>
                   )}
                 </div>
-              </div>
+              )}
             </div>
           </motion.div>
         </motion.div>
@@ -540,7 +529,9 @@ export default function Customers() {
           <div className="flex items-center">
             <Users className="w-8 h-8 text-blue-500" />
             <div className="mr-4">
-              <p className="text-2xl font-bold text-gray-900">{customers.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                <AnimatedCounter value={customers.length} />
+              </p>
               <p className="text-gray-600">
                 {language === "ar" ? "إجمالي العملاء" : "Total Customers"}
               </p>
@@ -552,7 +543,7 @@ export default function Customers() {
             <TrendingUp className="w-8 h-8 text-green-500" />
             <div className="mr-4">
               <p className="text-2xl font-bold text-gray-900">
-                {customers.filter(c => c.customerType === 'premium').length}
+                <AnimatedCounter value={customers.filter(c => c.customerType === 'premium').length} />
               </p>
               <p className="text-gray-600">
                 {language === "ar" ? "عملاء مميزون" : "Premium Customers"}
@@ -565,7 +556,7 @@ export default function Customers() {
             <DollarSign className="w-8 h-8 text-yellow-500" />
             <div className="mr-4">
               <p className="text-2xl font-bold text-gray-900">
-                ${customers.reduce((sum, c) => sum + (c.totalRevenue || 0), 0).toLocaleString()}
+                $<AnimatedCounter value={customers.reduce((sum, c) => sum + (c.totalRevenue || 0), 0)} />
               </p>
               <p className="text-gray-600">
                 {language === "ar" ? "إجمالي الإيرادات" : "Total Revenue"}
@@ -577,7 +568,9 @@ export default function Customers() {
           <div className="flex items-center">
             <ShoppingBag className="w-8 h-8 text-purple-500" />
             <div className="mr-4">
-              <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                <AnimatedCounter value={orders.length} />
+              </p>
               <p className="text-gray-600">
                 {language === "ar" ? "إجمالي الطلبات" : "Total Orders"}
               </p>

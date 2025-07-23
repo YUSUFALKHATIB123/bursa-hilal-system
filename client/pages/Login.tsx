@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import Logo from "../components/Logo";
 import { Eye, EyeOff, LogIn, AlertCircle, Globe } from "lucide-react";
 
 export default function Login() {
@@ -14,19 +15,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  // شعار الشركة: تجربة عدة امتدادات
-  const logoExtensions = ["png", "svg", "jpg", "jpeg", "webp"];
-  const [logoSrc, setLogoSrc] = useState(`/LOGO2.png`);
-  const [logoError, setLogoError] = useState(false);
-  const handleLogoError = () => {
-    const currentExt = logoSrc.split('.').pop();
-    const currentIndex = logoExtensions.indexOf(currentExt || "png");
-    if (currentIndex < logoExtensions.length - 1) {
-      setLogoSrc(`/LOGO2.${logoExtensions[currentIndex + 1]}`);
-    } else {
-      setLogoError(true);
-    }
-  };
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -76,16 +64,7 @@ export default function Login() {
         {/* Header */}
         <div className="bg-gradient-to-r from-green-primary to-green-secondary p-8 text-white text-center">
           <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            {!logoError ? (
-              <img
-                src={logoSrc}
-                alt="Company Logo"
-                className="w-20 h-20 object-contain"
-                onError={handleLogoError}
-              />
-            ) : (
-              <div className="w-20 h-20 flex items-center justify-center text-gray-400 text-xs">No Logo</div>
-            )}
+            <Logo size="lg" className="w-20 h-20" fallbackText="BH" />
           </div>
           <h1 className="text-3xl font-bold mb-2">
             {isArabic ? "بورصة هلال" : t("bursaHilal")}
