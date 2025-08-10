@@ -665,7 +665,11 @@ export default function Navbar({
                 placeholder={t("search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setShowGlobalSearch(true)}
+                onFocus={() => {
+                  setShowGlobalSearch(true);
+                  setUserMenuOpen(false);
+                  setNotificationsOpen(false);
+                }}
                 className="w-full pl-10 pr-4 py-2 sm:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-primary focus:border-transparent transition-all"
                 style={{
                   fontSize: "16px", // Prevent zoom on iOS

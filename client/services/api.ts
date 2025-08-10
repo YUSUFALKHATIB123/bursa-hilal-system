@@ -14,7 +14,7 @@ const API_BASE_URL = getApiBaseUrl();
 class ApiService {
   private async request(endpoint: string, options: RequestInit = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log('API Request URL:', url); // Debug log
+    // Production: Remove debug logs for better performance
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ class ApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('API Response:', { endpoint, data: Array.isArray(data) ? `Array(${data.length})` : typeof data });
+      // Production: Simplified logging
       return data;
     } catch (error) {
       console.error('API request failed:', { url, error });

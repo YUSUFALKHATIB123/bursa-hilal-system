@@ -4,6 +4,7 @@ import { X, Plus, User, Phone, Mail, MapPin } from "lucide-react";
 import apiService from "../services/api";
 import { useLanguage } from "../contexts/LanguageContext";
 import { toast } from 'react-toastify';
+import LocationSelector from "./LocationSelector";
 
 interface AddCustomerModalProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ export default function AddCustomerModal({
     whatsapp: "",
     email: "",
     location: "",
+    country: "",
+    province: "",
     type: "retail",
     notes: "",
   });
@@ -54,6 +57,8 @@ export default function AddCustomerModal({
         whatsapp: formData.whatsapp.trim(),
         email: formData.email.trim(),
         address: formData.location.trim(),
+        country: formData.country,
+        province: formData.province,
         notes: formData.notes.trim(),
       };
 
@@ -69,6 +74,8 @@ export default function AddCustomerModal({
         whatsapp: "",
         email: "",
         location: "",
+        country: "",
+        province: "",
         type: "retail",
         notes: "",
       });
@@ -113,6 +120,20 @@ export default function AddCustomerModal({
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  // معالجة تغيير الموقع من مكون LocationSelector
+  const handleLocationChange = (location: {
+    country: string;
+    province: string;
+    formattedAddress: string;
+  }) => {
+    setFormData({
+      ...formData,
+      country: location.country,
+      province: location.province,
+      location: location.formattedAddress,
     });
   };
 
@@ -215,18 +236,12 @@ export default function AddCustomerModal({
                   />
                 </div>
 
-                {/* Location */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {language === "ar" ? "الموقع" : "Location"}
-                  </label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder={language === "ar" ? "المدينة، البلد" : "City, Country"}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-primary focus:border-transparent"
+                {/* Location Selector */}
+                <div className="md:col-span-2">
+                  <LocationSelector
+                    onLocationChange={handleLocationChange}
+                    initialCountry={formData.country}
+                    initialProvince={formData.province}
                   />
                 </div>
 

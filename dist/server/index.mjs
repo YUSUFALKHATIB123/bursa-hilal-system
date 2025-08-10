@@ -16,13 +16,14 @@ import require$$0$6 from "safe-buffer";
 import require$$0$5 from "buffer";
 import require$$2 from "inherits";
 import require$$3$1 from "util-deprecate";
+import fs$1 from "fs/promises";
 function handleDemo(req, res) {
   res.json({ message: "Demo endpoint working!" });
 }
-const __filename$6 = fileURLToPath(import.meta.url);
-const __dirname$7 = path.dirname(__filename$6);
-const router$7 = Router();
-const ordersFilePath = path.join(__dirname$7, "../data/orders.json");
+const __filename$8 = fileURLToPath(import.meta.url);
+const __dirname$8 = path.dirname(__filename$8);
+const router$8 = Router();
+const ordersFilePath = path.join(__dirname$8, "../data/orders.json");
 const readOrders = () => {
   const data = fs.readFileSync(ordersFilePath, "utf8");
   return JSON.parse(data);
@@ -30,7 +31,7 @@ const readOrders = () => {
 const writeOrders = (orders) => {
   fs.writeFileSync(ordersFilePath, JSON.stringify(orders, null, 2), "utf8");
 };
-router$7.get("/", (req, res) => {
+router$8.get("/", (req, res) => {
   try {
     const orders = readOrders();
     res.json(orders);
@@ -38,7 +39,7 @@ router$7.get("/", (req, res) => {
     res.status(500).json({ message: "Error reading orders data" });
   }
 });
-router$7.get("/:id", (req, res) => {
+router$8.get("/:id", (req, res) => {
   try {
     const orders = readOrders();
     const order = orders.find((o) => o.id === req.params.id);
@@ -51,7 +52,7 @@ router$7.get("/:id", (req, res) => {
     res.status(500).json({ message: "Error reading order data" });
   }
 });
-router$7.post("/", (req, res) => {
+router$8.post("/", (req, res) => {
   try {
     const orders = readOrders();
     const { customer, product, quantity, colors, deadline, price } = req.body;
@@ -90,7 +91,7 @@ router$7.post("/", (req, res) => {
     res.status(500).json({ message: "Error creating order", error: String(error) });
   }
 });
-router$7.put("/:id", (req, res) => {
+router$8.put("/:id", (req, res) => {
   try {
     let orders = readOrders();
     const index = orders.findIndex((o) => o.id === req.params.id);
@@ -105,7 +106,7 @@ router$7.put("/:id", (req, res) => {
     res.status(500).json({ message: "Error updating order" });
   }
 });
-router$7.delete("/:id", (req, res) => {
+router$8.delete("/:id", (req, res) => {
   try {
     let orders = readOrders();
     const initialLength = orders.length;
@@ -120,7 +121,7 @@ router$7.delete("/:id", (req, res) => {
     res.status(500).json({ message: "Error deleting order" });
   }
 });
-router$7.post("/:id/timeline-note", (req, res) => {
+router$8.post("/:id/timeline-note", (req, res) => {
   try {
     const orders = readOrders();
     const order = orders.find((o) => o.id === req.params.id);
@@ -142,7 +143,7 @@ router$7.post("/:id/timeline-note", (req, res) => {
     res.status(500).json({ message: "Error adding timeline note" });
   }
 });
-router$7.put("/:id/progress", (req, res) => {
+router$8.put("/:id/progress", (req, res) => {
   try {
     const orders = readOrders();
     const order = orders.find((o) => o.id === req.params.id);
@@ -7202,11 +7203,11 @@ function requireMulter() {
 }
 var multerExports = requireMulter();
 const multer = /* @__PURE__ */ getDefaultExportFromCjs(multerExports);
-const __filename$5 = fileURLToPath(import.meta.url);
-const __dirname$6 = path.dirname(__filename$5);
-const router$6 = Router();
-const dataFilePath$5 = path.join(__dirname$6, "../data/invoices.json");
-const uploadsDir = path.join(__dirname$6, "../uploads/invoices");
+const __filename$7 = fileURLToPath(import.meta.url);
+const __dirname$7 = path.dirname(__filename$7);
+const router$7 = Router();
+const dataFilePath$5 = path.join(__dirname$7, "../data/invoices.json");
+const uploadsDir = path.join(__dirname$7, "../uploads/invoices");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -7242,7 +7243,7 @@ const readData$5 = () => {
 const writeData$5 = (data) => {
   fs.writeFileSync(dataFilePath$5, JSON.stringify(data, null, 2), "utf8");
 };
-router$6.get("/", (req, res) => {
+router$7.get("/", (req, res) => {
   try {
     const data = readData$5();
     res.json(data);
@@ -7250,7 +7251,7 @@ router$6.get("/", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$6.get("/:id", (req, res) => {
+router$7.get("/:id", (req, res) => {
   try {
     const data = readData$5();
     const item = Array.isArray(data) ? data.find((i) => i.id === req.params.id) : data;
@@ -7263,7 +7264,7 @@ router$6.get("/:id", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$6.post("/", (req, res) => {
+router$7.post("/", (req, res) => {
   try {
     const data = readData$5();
     if (Array.isArray(data)) {
@@ -7284,7 +7285,7 @@ router$6.post("/", (req, res) => {
     res.status(500).json({ message: "Error creating data" });
   }
 });
-router$6.post("/upload", upload$1.single("file"), (req, res) => {
+router$7.post("/upload", upload$1.single("file"), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -7326,7 +7327,7 @@ router$6.post("/upload", upload$1.single("file"), (req, res) => {
     res.status(500).json({ message: "Error uploading file" });
   }
 });
-router$6.get("/download/:filename", (req, res) => {
+router$7.get("/download/:filename", (req, res) => {
   try {
     const filename = req.params.filename;
     const filePath = path.join(uploadsDir, filename);
@@ -7340,7 +7341,7 @@ router$6.get("/download/:filename", (req, res) => {
     res.status(500).json({ message: "Error downloading file" });
   }
 });
-router$6.put("/:id", (req, res) => {
+router$7.put("/:id", (req, res) => {
   try {
     let data = readData$5();
     if (Array.isArray(data)) {
@@ -7361,7 +7362,7 @@ router$6.put("/:id", (req, res) => {
     res.status(500).json({ message: "Error updating item" });
   }
 });
-router$6.delete("/:id", (req, res) => {
+router$7.delete("/:id", (req, res) => {
   try {
     let data = readData$5();
     if (Array.isArray(data)) {
@@ -7387,10 +7388,10 @@ router$6.delete("/:id", (req, res) => {
     res.status(500).json({ message: "Error deleting item" });
   }
 });
-const __filename$4 = fileURLToPath(import.meta.url);
-const __dirname$5 = path.dirname(__filename$4);
-const router$5 = Router();
-const dataFilePath$4 = path.join(__dirname$5, "../data/customers.json");
+const __filename$6 = fileURLToPath(import.meta.url);
+const __dirname$6 = path.dirname(__filename$6);
+const router$6 = Router();
+const dataFilePath$4 = path.join(__dirname$6, "../data/customers.json");
 const readData$4 = () => {
   const data = fs.readFileSync(dataFilePath$4, "utf8");
   return JSON.parse(data);
@@ -7398,7 +7399,7 @@ const readData$4 = () => {
 const writeData$4 = (data) => {
   fs.writeFileSync(dataFilePath$4, JSON.stringify(data, null, 2), "utf8");
 };
-router$5.get("/", (req, res) => {
+router$6.get("/", (req, res) => {
   try {
     const data = readData$4();
     res.json(data);
@@ -7406,7 +7407,7 @@ router$5.get("/", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$5.get("/:id", (req, res) => {
+router$6.get("/:id", (req, res) => {
   try {
     const data = readData$4();
     const item = Array.isArray(data) ? data.find((i) => i.id === req.params.id) : data;
@@ -7419,7 +7420,7 @@ router$5.get("/:id", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$5.post("/", (req, res) => {
+router$6.post("/", (req, res) => {
   try {
     const data = readData$4();
     if (Array.isArray(data)) {
@@ -7434,7 +7435,7 @@ router$5.post("/", (req, res) => {
     res.status(500).json({ message: "Error creating item" });
   }
 });
-router$5.put("/:id", (req, res) => {
+router$6.put("/:id", (req, res) => {
   try {
     let data = readData$4();
     if (Array.isArray(data)) {
@@ -7455,7 +7456,7 @@ router$5.put("/:id", (req, res) => {
     res.status(500).json({ message: "Error updating item" });
   }
 });
-router$5.delete("/:id", (req, res) => {
+router$6.delete("/:id", (req, res) => {
   try {
     let data = readData$4();
     if (Array.isArray(data)) {
@@ -7474,9 +7475,11 @@ router$5.delete("/:id", (req, res) => {
     res.status(500).json({ message: "Error deleting item" });
   }
 });
-const router$4 = express.Router();
-const inventoryDataPath = path__default.join(__dirname, "../data/inventory.json");
-const stockMovementsPath = path__default.join(__dirname, "../data/stock_movements.json");
+const __filename$5 = fileURLToPath(import.meta.url);
+const __dirname$5 = path__default.dirname(__filename$5);
+const router$5 = express.Router();
+const inventoryDataPath = path__default.join(__dirname$5, "../data/inventory.json");
+const stockMovementsPath = path__default.join(__dirname$5, "../data/stock_movements.json");
 const readJsonFile = (filePath) => {
   try {
     const data = fs__default.readFileSync(filePath, "utf8");
@@ -7495,7 +7498,7 @@ const writeJsonFile = (filePath, data) => {
     return false;
   }
 };
-router$4.get("/", (req, res) => {
+router$5.get("/", (req, res) => {
   try {
     const inventory = readJsonFile(inventoryDataPath);
     res.json(inventory);
@@ -7504,7 +7507,7 @@ router$4.get("/", (req, res) => {
     res.status(500).json({ error: "Failed to fetch inventory" });
   }
 });
-router$4.get("/:id", (req, res) => {
+router$5.get("/:id", (req, res) => {
   try {
     const inventory = readJsonFile(inventoryDataPath);
     const item = inventory.find((item2) => item2.id === req.params.id);
@@ -7517,7 +7520,7 @@ router$4.get("/:id", (req, res) => {
     res.status(500).json({ error: "Failed to fetch inventory item" });
   }
 });
-router$4.post("/", (req, res) => {
+router$5.post("/", (req, res) => {
   try {
     const inventory = readJsonFile(inventoryDataPath);
     const newItem = {
@@ -7536,7 +7539,7 @@ router$4.post("/", (req, res) => {
     res.status(500).json({ error: "Failed to create inventory item" });
   }
 });
-router$4.put("/:id", (req, res) => {
+router$5.put("/:id", (req, res) => {
   try {
     const inventory = readJsonFile(inventoryDataPath);
     const index = inventory.findIndex((item) => item.id === req.params.id);
@@ -7558,7 +7561,7 @@ router$4.put("/:id", (req, res) => {
     res.status(500).json({ error: "Failed to update inventory item" });
   }
 });
-router$4.delete("/:id", (req, res) => {
+router$5.delete("/:id", (req, res) => {
   try {
     const inventory = readJsonFile(inventoryDataPath);
     const index = inventory.findIndex((item) => item.id === req.params.id);
@@ -7575,7 +7578,7 @@ router$4.delete("/:id", (req, res) => {
     res.status(500).json({ error: "Failed to soft delete inventory item" });
   }
 });
-router$4.get("/movements/all", (req, res) => {
+router$5.get("/movements/all", (req, res) => {
   try {
     const movements = readJsonFile(stockMovementsPath);
     res.json(movements);
@@ -7584,7 +7587,7 @@ router$4.get("/movements/all", (req, res) => {
     res.status(500).json({ error: "Failed to fetch stock movements" });
   }
 });
-router$4.get("/movements/:itemId", (req, res) => {
+router$5.get("/movements/:itemId", (req, res) => {
   try {
     const movements = readJsonFile(stockMovementsPath);
     const itemMovements = movements.filter((movement) => movement.itemId === req.params.itemId);
@@ -7594,7 +7597,7 @@ router$4.get("/movements/:itemId", (req, res) => {
     res.status(500).json({ error: "Failed to fetch item movements" });
   }
 });
-router$4.post("/movements", (req, res) => {
+router$5.post("/movements", (req, res) => {
   try {
     const movements = readJsonFile(stockMovementsPath);
     const newMovement = {
@@ -7613,7 +7616,7 @@ router$4.post("/movements", (req, res) => {
     res.status(500).json({ error: "Failed to create stock movement" });
   }
 });
-router$4.post("/:id/movement", (req, res) => {
+router$5.post("/:id/movement", (req, res) => {
   try {
     const { operation, quantity, notes, date, user } = req.body;
     if (!operation || !quantity || quantity <= 0) {
@@ -7672,9 +7675,9 @@ router$4.post("/:id/movement", (req, res) => {
     res.status(500).json({ error: "Failed to process stock movement" });
   }
 });
-const __filename$3 = fileURLToPath(import.meta.url);
-const __dirname$4 = path.dirname(__filename$3);
-const router$3 = Router();
+const __filename$4 = fileURLToPath(import.meta.url);
+const __dirname$4 = path.dirname(__filename$4);
+const router$4 = Router();
 const dataFilePath$3 = path.join(__dirname$4, "../data/employees.json");
 const readData$3 = () => {
   const data = fs.readFileSync(dataFilePath$3, "utf8");
@@ -7683,7 +7686,7 @@ const readData$3 = () => {
 const writeData$3 = (data) => {
   fs.writeFileSync(dataFilePath$3, JSON.stringify(data, null, 2), "utf8");
 };
-router$3.get("/", (req, res) => {
+router$4.get("/", (req, res) => {
   try {
     const data = readData$3();
     res.json(data);
@@ -7691,7 +7694,7 @@ router$3.get("/", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$3.get("/:id", (req, res) => {
+router$4.get("/:id", (req, res) => {
   try {
     const data = readData$3();
     const item = Array.isArray(data) ? data.find((i) => i.id === req.params.id) : data;
@@ -7704,7 +7707,7 @@ router$3.get("/:id", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$3.post("/", (req, res) => {
+router$4.post("/", (req, res) => {
   try {
     const data = readData$3();
     if (Array.isArray(data)) {
@@ -7719,7 +7722,7 @@ router$3.post("/", (req, res) => {
     res.status(500).json({ message: "Error creating item" });
   }
 });
-router$3.put("/:id", (req, res) => {
+router$4.put("/:id", (req, res) => {
   try {
     let data = readData$3();
     if (Array.isArray(data)) {
@@ -7740,7 +7743,7 @@ router$3.put("/:id", (req, res) => {
     res.status(500).json({ message: "Error updating item" });
   }
 });
-router$3.delete("/:id", (req, res) => {
+router$4.delete("/:id", (req, res) => {
   try {
     let data = readData$3();
     if (Array.isArray(data)) {
@@ -7759,9 +7762,9 @@ router$3.delete("/:id", (req, res) => {
     res.status(500).json({ message: "Error deleting item" });
   }
 });
-const __filename$2 = fileURLToPath(import.meta.url);
-const __dirname$3 = path.dirname(__filename$2);
-const router$2 = Router();
+const __filename$3 = fileURLToPath(import.meta.url);
+const __dirname$3 = path.dirname(__filename$3);
+const router$3 = Router();
 const dataFilePath$2 = path.join(__dirname$3, "../data/notifications.json");
 const readData$2 = () => {
   const data = fs.readFileSync(dataFilePath$2, "utf8");
@@ -7770,7 +7773,7 @@ const readData$2 = () => {
 const writeData$2 = (data) => {
   fs.writeFileSync(dataFilePath$2, JSON.stringify(data, null, 2), "utf8");
 };
-router$2.get("/", (req, res) => {
+router$3.get("/", (req, res) => {
   try {
     const data = readData$2();
     res.json(data);
@@ -7778,7 +7781,7 @@ router$2.get("/", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$2.get("/:id", (req, res) => {
+router$3.get("/:id", (req, res) => {
   try {
     const data = readData$2();
     const item = Array.isArray(data) ? data.find((i) => i.id === req.params.id) : data;
@@ -7791,7 +7794,7 @@ router$2.get("/:id", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$2.post("/", (req, res) => {
+router$3.post("/", (req, res) => {
   try {
     const data = readData$2();
     if (Array.isArray(data)) {
@@ -7811,7 +7814,7 @@ router$2.post("/", (req, res) => {
     res.status(500).json({ message: "Error creating item" });
   }
 });
-router$2.put("/:id", (req, res) => {
+router$3.put("/:id", (req, res) => {
   try {
     let data = readData$2();
     if (Array.isArray(data)) {
@@ -7832,7 +7835,7 @@ router$2.put("/:id", (req, res) => {
     res.status(500).json({ message: "Error updating item" });
   }
 });
-router$2.delete("/:id", (req, res) => {
+router$3.delete("/:id", (req, res) => {
   try {
     let data = readData$2();
     if (Array.isArray(data)) {
@@ -7851,7 +7854,7 @@ router$2.delete("/:id", (req, res) => {
     res.status(500).json({ message: "Error deleting item" });
   }
 });
-router$2.patch("/:id/read", (req, res) => {
+router$3.patch("/:id/read", (req, res) => {
   try {
     let data = readData$2();
     if (Array.isArray(data)) {
@@ -7870,7 +7873,7 @@ router$2.patch("/:id/read", (req, res) => {
     res.status(500).json({ message: "Error marking notification as read" });
   }
 });
-router$2.patch("/read-all", (req, res) => {
+router$3.patch("/read-all", (req, res) => {
   try {
     let data = readData$2();
     if (Array.isArray(data)) {
@@ -7884,9 +7887,9 @@ router$2.patch("/read-all", (req, res) => {
     res.status(500).json({ message: "Error marking all notifications as read" });
   }
 });
-const __filename$1 = fileURLToPath(import.meta.url);
-const __dirname$2 = path.dirname(__filename$1);
-const router$1 = Router();
+const __filename$2 = fileURLToPath(import.meta.url);
+const __dirname$2 = path.dirname(__filename$2);
+const router$2 = Router();
 const dataFilePath$1 = path.join(__dirname$2, "../data/financials.json");
 const readData$1 = () => {
   const data = fs.readFileSync(dataFilePath$1, "utf8");
@@ -7895,7 +7898,7 @@ const readData$1 = () => {
 const writeData$1 = (data) => {
   fs.writeFileSync(dataFilePath$1, JSON.stringify(data, null, 2), "utf8");
 };
-router$1.get("/", (req, res) => {
+router$2.get("/", (req, res) => {
   try {
     const data = readData$1();
     res.json(data);
@@ -7903,7 +7906,7 @@ router$1.get("/", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$1.get("/:id", (req, res) => {
+router$2.get("/:id", (req, res) => {
   try {
     const data = readData$1();
     const item = Array.isArray(data) ? data.find((i) => i.id === req.params.id) : data;
@@ -7916,7 +7919,7 @@ router$1.get("/:id", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router$1.post("/", (req, res) => {
+router$2.post("/", (req, res) => {
   try {
     const data = readData$1();
     if (Array.isArray(data)) {
@@ -7931,7 +7934,7 @@ router$1.post("/", (req, res) => {
     res.status(500).json({ message: "Error creating item" });
   }
 });
-router$1.put("/:id", (req, res) => {
+router$2.put("/:id", (req, res) => {
   try {
     let data = readData$1();
     if (Array.isArray(data)) {
@@ -7952,7 +7955,7 @@ router$1.put("/:id", (req, res) => {
     res.status(500).json({ message: "Error updating item" });
   }
 });
-router$1.delete("/:id", (req, res) => {
+router$2.delete("/:id", (req, res) => {
   try {
     let data = readData$1();
     if (Array.isArray(data)) {
@@ -7971,9 +7974,9 @@ router$1.delete("/:id", (req, res) => {
     res.status(500).json({ message: "Error deleting item" });
   }
 });
-const __filename = fileURLToPath(import.meta.url);
-const __dirname$1 = path.dirname(__filename);
-const router = Router();
+const __filename$1 = fileURLToPath(import.meta.url);
+const __dirname$1 = path.dirname(__filename$1);
+const router$1 = Router();
 const dataFilePath = path.join(__dirname$1, "../data/suppliers.json");
 const readData = () => {
   const data = fs.readFileSync(dataFilePath, "utf8");
@@ -8008,7 +8011,7 @@ const upload = multer({
     }
   }
 });
-router.get("/", (req, res) => {
+router$1.get("/", (req, res) => {
   try {
     const data = readData();
     res.json(data);
@@ -8016,7 +8019,7 @@ router.get("/", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router.get("/:id", (req, res) => {
+router$1.get("/:id", (req, res) => {
   try {
     const data = readData();
     const item = Array.isArray(data) ? data.find((i) => i.id === req.params.id) : data;
@@ -8029,7 +8032,7 @@ router.get("/:id", (req, res) => {
     res.status(500).json({ message: "Error reading data" });
   }
 });
-router.post("/", (req, res) => {
+router$1.post("/", (req, res) => {
   try {
     const data = readData();
     if (Array.isArray(data)) {
@@ -8044,7 +8047,7 @@ router.post("/", (req, res) => {
     res.status(500).json({ message: "Error creating item" });
   }
 });
-router.put("/:id", (req, res) => {
+router$1.put("/:id", (req, res) => {
   try {
     let data = readData();
     if (Array.isArray(data)) {
@@ -8065,7 +8068,7 @@ router.put("/:id", (req, res) => {
     res.status(500).json({ message: "Error updating item" });
   }
 });
-router.delete("/:id", (req, res) => {
+router$1.delete("/:id", (req, res) => {
   try {
     let data = readData();
     if (Array.isArray(data)) {
@@ -8084,7 +8087,7 @@ router.delete("/:id", (req, res) => {
     res.status(500).json({ message: "Error deleting item" });
   }
 });
-router.get("/:id/invoices", (req, res) => {
+router$1.get("/:id/invoices", (req, res) => {
   try {
     const data = readData();
     const supplier = Array.isArray(data) ? data.find((i) => i.id === req.params.id) : null;
@@ -8094,7 +8097,7 @@ router.get("/:id/invoices", (req, res) => {
     res.status(500).json({ message: "Error reading supplier invoices" });
   }
 });
-router.post("/:id/invoices", upload.single("file"), (req, res) => {
+router$1.post("/:id/invoices", upload.single("file"), (req, res) => {
   try {
     const data = readData();
     const supplierIndex = Array.isArray(data) ? data.findIndex((i) => i.id === req.params.id) : -1;
@@ -8124,7 +8127,7 @@ router.post("/:id/invoices", upload.single("file"), (req, res) => {
     res.status(500).json({ message: "Error saving supplier invoice" });
   }
 });
-router.put("/:id/invoices/:invoiceId", (req, res) => {
+router$1.put("/:id/invoices/:invoiceId", (req, res) => {
   try {
     const data = readData();
     const supplierIndex = Array.isArray(data) ? data.findIndex((i) => i.id === req.params.id) : -1;
@@ -8140,7 +8143,7 @@ router.put("/:id/invoices/:invoiceId", (req, res) => {
     res.status(500).json({ message: "Error updating supplier invoice" });
   }
 });
-router.get("/:id/invoices/download/:filename", (req, res) => {
+router$1.get("/:id/invoices/download/:filename", (req, res) => {
   try {
     const filename = req.params.filename;
     const filePath = path.join(supplierInvoicesDir, filename);
@@ -8151,6 +8154,81 @@ router.get("/:id/invoices/download/:filename", (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: "Error downloading file" });
+  }
+});
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path__default.dirname(__filename);
+const router = express.Router();
+const expensesFilePath = path__default.join(__dirname, "../data/expenses.json");
+router.get("/", async (req, res) => {
+  try {
+    const data = await fs$1.readFile(expensesFilePath, "utf8");
+    const expenses = JSON.parse(data);
+    res.json(expenses);
+  } catch (error) {
+    console.error("Error reading expenses file:", error);
+    res.status(500).json({ error: "Failed to read expenses data" });
+  }
+});
+router.get("/category/:category", async (req, res) => {
+  try {
+    const data = await fs$1.readFile(expensesFilePath, "utf8");
+    const expenses = JSON.parse(data);
+    const filteredExpenses = expenses.filter(
+      (expense) => expense.category.toLowerCase() === req.params.category.toLowerCase()
+    );
+    res.json(filteredExpenses);
+  } catch (error) {
+    console.error("Error reading expenses file:", error);
+    res.status(500).json({ error: "Failed to read expenses data" });
+  }
+});
+router.post("/", async (req, res) => {
+  try {
+    const data = await fs$1.readFile(expensesFilePath, "utf8");
+    const expenses = JSON.parse(data);
+    const newExpense = {
+      id: `EXP-${String(expenses.length + 1).padStart(3, "0")}`,
+      ...req.body,
+      date: (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+    };
+    expenses.push(newExpense);
+    await fs$1.writeFile(expensesFilePath, JSON.stringify(expenses, null, 2));
+    res.status(201).json(newExpense);
+  } catch (error) {
+    console.error("Error adding expense:", error);
+    res.status(500).json({ error: "Failed to add expense" });
+  }
+});
+router.put("/:id", async (req, res) => {
+  try {
+    const data = await fs$1.readFile(expensesFilePath, "utf8");
+    const expenses = JSON.parse(data);
+    const expenseIndex = expenses.findIndex((expense) => expense.id === req.params.id);
+    if (expenseIndex === -1) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+    expenses[expenseIndex] = { ...expenses[expenseIndex], ...req.body };
+    await fs$1.writeFile(expensesFilePath, JSON.stringify(expenses, null, 2));
+    res.json(expenses[expenseIndex]);
+  } catch (error) {
+    console.error("Error updating expense:", error);
+    res.status(500).json({ error: "Failed to update expense" });
+  }
+});
+router.delete("/:id", async (req, res) => {
+  try {
+    const data = await fs$1.readFile(expensesFilePath, "utf8");
+    const expenses = JSON.parse(data);
+    const filteredExpenses = expenses.filter((expense) => expense.id !== req.params.id);
+    if (filteredExpenses.length === expenses.length) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+    await fs$1.writeFile(expensesFilePath, JSON.stringify(filteredExpenses, null, 2));
+    res.json({ message: "Expense deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting expense:", error);
+    res.status(500).json({ error: "Failed to delete expense" });
   }
 });
 function createServer() {
@@ -8175,14 +8253,15 @@ function createServer() {
     res.json({ message: "Hello from Express server v2!" });
   });
   app.get("/api/demo", handleDemo);
-  app.use("/api/orders", router$7);
-  app.use("/api/invoices", router$6);
-  app.use("/api/customers", router$5);
-  app.use("/api/inventory", router$4);
-  app.use("/api/employees", router$3);
-  app.use("/api/notifications", router$2);
-  app.use("/api/financials", router$1);
-  app.use("/api/suppliers", router);
+  app.use("/api/orders", router$8);
+  app.use("/api/invoices", router$7);
+  app.use("/api/customers", router$6);
+  app.use("/api/inventory", router$5);
+  app.use("/api/employees", router$4);
+  app.use("/api/notifications", router$3);
+  app.use("/api/financials", router$2);
+  app.use("/api/suppliers", router$1);
+  app.use("/api/expenses", router);
   return app;
 }
 export {

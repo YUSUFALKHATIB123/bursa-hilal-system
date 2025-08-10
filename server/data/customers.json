@@ -78,5 +78,25 @@
     "email": "yousef.alkhatib.ya@gmail.com",
     "address": "asdasd",
     "notes": "شسيشسي"
+  },
+  {
+    "id": "CUS-1754748671073",
+    "name": "YUSUF ALKHATIB",
+    "phone": "05343168831",
+    "whatsapp": "",
+    "email": "yousef.alkhatib.ya@gmail.com",
+    "address": "SYRIA",
+    "notes": "ASD"
+  },
+  {
+    "id": "CUS-1754749159955",
+    "name": "YUSUF ALKHATIB",
+    "phone": "05343168831",
+    "whatsapp": "",
+    "email": "yousef.alkhatib.ya@gmail.com",
+    "address": "حلب, سوريا",
+    "country": "syria",
+    "province": "aleppo",
+    "notes": ""
   }
 ]

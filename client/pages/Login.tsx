@@ -63,17 +63,17 @@ export default function Login() {
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-green-primary to-green-secondary p-8 text-white text-center">
-          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Logo size="lg" className="w-20 h-20" fallbackText="BH" />
+          <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-white/20">
+            <Logo size="lg" className="w-24 h-24 object-contain ml-1" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">
-            {isArabic ? "بورصة هلال" : t("bursaHilal")}
+          <h1 className="text-3xl font-bold mb-3 tracking-wide">
+            {isArabic ? "بورصة هلال" : "Bursa Hilal"}
           </h1>
-          <p className="text-green-100 mb-2">{t("factoryManagement")}</p>
+          <p className="text-green-100 text-lg opacity-90">{isArabic ? "نظام إدارة المصنع" : "Factory Management System"}</p>
         </div>
 
         {/* Login Form */}
-        <div className="p-8">
+        <div className="p-8 bg-gray-50/30">
           <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -136,34 +136,7 @@ export default function Login() {
         </motion.button>
       </form>
 
-      {/* Demo Credentials */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8 p-4 bg-gray-50 rounded-lg"
-      >
-        <h3 className="text-sm font-medium text-gray-700 mb-2">
-          {t("demoAccounts")}
-        </h3>
-        <div className="text-xs text-gray-600 space-y-1">
-          <p>
-            <strong>{isArabic ? "مدير النظام" : "Admin"}:</strong> yusuf@bursahilal.com / admin123
-          </p>
-          <p>
-            <strong>{isArabic ? "المالك" : "Owner"}:</strong> mustafa@bursahilal.com / owner123
-          </p>
-          <p>
-            <strong>{isArabic ? "المدير المساعد" : "Manager"}:</strong> mohammad@bursahilal.com / manager123
-          </p>
-          <p>
-            <strong>{isArabic ? "المحاسب" : "Accountant"}:</strong> accountant@bursahilal.com / account123
-          </p>
-          <p>
-            <strong>{isArabic ? "مدير الإنتاج" : "Production"}:</strong> production@bursahilal.com / production123
-          </p>
-        </div>
-      </motion.div>
+
     </div>
   </motion.div>
 </div>

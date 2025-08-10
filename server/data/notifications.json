@@ -175,5 +175,26 @@
     "icon": "ShoppingCart",
     "userId": "1",
     "userName": "Yusuf Alkhatib"
+  },
+  {
+    "id": "NOTIF-1754741719175",
+    "timestamp": "2025-08-09T12:15:19.175Z",
+    "read": false,
+    "title": {
+      "en": "New Order Created",
+      "ar": "تم إنشاء طلب جديد"
+    },
+    "message": {
+      "en": "Order ORD-719167 for YUSUF ALKHATIB created by Yusuf Alkhatib",
+      "ar": "تم إنشاء طلب ORD-719167 للعميل YUSUF ALKHATIB بواسطة Yusuf Alkhatib"
+    },
+    "type": "order_created",
+    "category": "production",
+    "priority": "medium",
+    "actionUrl": "/track-order/ORD-719167/details",
+    "relatedEntityId": "ORD-719167",
+    "icon": "ShoppingCart",
+    "userId": "1",
+    "userName": "Yusuf Alkhatib"
   }
 ]

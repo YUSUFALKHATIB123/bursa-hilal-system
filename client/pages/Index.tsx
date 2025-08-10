@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import AnimatedCounter from "../components/AnimatedCounter";
+import { CurrencyConverter, CURRENCY_CONFIG } from "../utils/currency";
 import apiService from "../services/api";
 import { logMobileConnectionInfo, isMobileDevice } from "../utils/mobileConnection";
 import { verifyDataConsistency } from "../utils/dataConsistency";
@@ -21,43 +23,6 @@ import {
   Target,
   Activity,
 } from "lucide-react";
-
-function AnimatedCounter({
-  value,
-  duration = 2000,
-  suffix = "",
-  prefix = "",
-}: {
-  value: number;
-  duration?: number;
-  suffix?: string;
-  prefix?: string;
-}) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let startTime: number;
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      setCount(Math.floor(progress * value));
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
-  }, [value, duration]);
-
-  return (
-    <span>
-      {prefix}
-      {count.toLocaleString()}
-      {suffix}
-    </span>
-  );
-}
 
 function RoleBasedCard({
   title,
@@ -141,7 +106,7 @@ export default function Index() {
           logMobileConnectionInfo();
         }
         
-        console.log('Fetching dashboard data...'); // Debug log
+        // Fetching dashboard data from API
         const [ordersData, inventoryData, notificationsData, invoicesData, financialsData, employeesData] = await Promise.all([
           apiService.getOrders(),
           apiService.getInventory(),
@@ -151,14 +116,7 @@ export default function Index() {
           apiService.getEmployees()
         ]);
         
-        console.log('Dashboard data received:', {
-          orders: ordersData?.length,
-          inventory: inventoryData?.length,
-          notifications: notificationsData?.length,
-          invoices: invoicesData?.length,
-          financials: Object.keys(financialsData || {}).length,
-          employees: employeesData?.length
-        }); // Debug log
+        // Data successfully loaded from API
         
         setOrders(ordersData || []);
         setInventory(inventoryData || []);
